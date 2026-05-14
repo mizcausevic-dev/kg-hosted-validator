@@ -315,7 +315,7 @@
     <header class="top">
       <div class="kicker">Kinetic Gain Protocol Suite</div>
       <h1>Validate any AI governance JSON, <span class="serif">in your browser.</span></h1>
-      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the ten Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. Errors surface as inline markers in the editor, with line numbers. No upload, no server, no signup.</p>
+      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the eleven Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. Errors surface as inline markers in the editor, with line numbers. No upload, no server, no signup.</p>
     </header>
 
     <div class="pair">
@@ -352,9 +352,9 @@
             <div class="hero-decoration">○</div>
             <div class="hero-label">Ready</div>
             <h2 class="hero-title">Paste Suite JSON</h2>
-            <p class="hero-detail">Validation runs automatically as you type. All ten spec schemas are bundled with this page — nothing is uploaded.</p>
+            <p class="hero-detail">Validation runs automatically as you type. All eleven spec schemas are bundled with this page — nothing is uploaded.</p>
           </div>
-          <p class="hint">The version field at the top level of your document selects which of the ten spec schemas validates it. Errors include both the JSON path and the line number for easy navigation.</p>
+          <p class="hint">The version field at the top level of your document selects which of the eleven spec schemas validates it. Errors include both the JSON path and the line number for easy navigation.</p>
         </div>
       </section>
     </div>
@@ -509,7 +509,8 @@
       { versionField: "disclosure_version",       schemaKey: "student-ai-disclosure", displayName: "Student AI Disclosure" },
       { versionField: "aup_version",              schemaKey: "aup",                   displayName: "Classroom AI AUP" },
       { versionField: "clinical_ai_card_version", schemaKey: "clinical-ai-card",      displayName: "Clinical AI Card" },
-      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" }
+      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" },
+      { versionField: "decision_card_version",    schemaKey: "decision-card",         displayName: "AI Procurement Decision Card" }
     ];
 
     const schemas  = JSON.parse(document.getElementById("schemas-blob").textContent);
@@ -659,8 +660,8 @@
 
     function showIdle() {
       setResult(
-        renderHero("idle", "Ready", "Paste Suite JSON", "Validation runs automatically as you type. All ten spec schemas are bundled with this page — nothing is uploaded.")
-        + `<p class="hint">The version field at the top level of your document selects which of the ten spec schemas validates it. Errors include both the JSON path and the line number in the editor for easy navigation.</p>`,
+        renderHero("idle", "Ready", "Paste Suite JSON", "Validation runs automatically as you type. All eleven spec schemas are bundled with this page — nothing is uploaded.")
+        + `<p class="hint">The version field at the top level of your document selects which of the eleven spec schemas validates it. Errors include both the JSON path and the line number in the editor for easy navigation.</p>`,
         null,
         "idle"
       );

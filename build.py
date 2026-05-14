@@ -32,6 +32,7 @@ SPECS = [
     ("aup",                   "classroom-ai-aup-spec",      "aup.schema.json",                  "district-k12-strict.json"),
     ("clinical-ai-card",      "clinical-ai-disclosure-spec", "clinical-ai-card.schema.json",    "research-molecule-design.json"),
     ("incident-card",         "ai-incident-card-spec",      "incident-card.schema.json",        "pii-leak-cite-check.json"),
+    ("decision-card",         "ai-procurement-decision-spec","decision-card.schema.json",       "district-edtech-approved-conditions.json"),
 ]
 
 DISPLAY_NAMES = {
@@ -45,6 +46,7 @@ DISPLAY_NAMES = {
     "aup":                   "Classroom AI AUP",
     "clinical-ai-card":      "Clinical AI Card",
     "incident-card":         "AI Incident Card",
+    "decision-card":         "AI Procurement Decision Card",
 }
 
 
