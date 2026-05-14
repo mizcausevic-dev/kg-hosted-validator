@@ -1,0 +1,64 @@
+# Kinetic Gain Suite Validator
+
+> Zero-install, in-browser validator for Kinetic Gain Protocol Suite JSON documents.
+
+A single-file static web app that validates any JSON document against the ten Kinetic Gain Protocol Suite specifications. The page auto-detects which spec a document belongs to via its top-level version field (`aeo_version`, `clinical_ai_card_version`, `aup_version`, …) and validates against the canonical JSON Schema 2020-12 document bundled in-page. Errors surface as inline markers in a Monaco editor with line numbers and a "jump" link from the violation list. All validation happens in the browser — no upload, no server, no signup.
+
+## Identity
+
+- **Subdomain**: [validator.kineticgain.com](https://validator.kineticgain.com/)
+- **Source repo**: [github.com/mizcausevic-dev/kg-hosted-validator](https://github.com/mizcausevic-dev/kg-hosted-validator)
+- **Buyer audience**: AI procurement teams · EdTech district contracting · HealthTech vendor reviewers · Spec authors · CI engineers
+- **Category**: Free hosted tool — lead magnet for the Suite
+- **License**: MIT (the validator app); schemas it bundles are MIT (from their respective spec repos)
+- **Architecture**: Single `index.html` (~110 KB). Monaco editor loaded from CDN at runtime. AJV + ajv-formats + jsonc-parser via `esm.sh` import map. No build pipeline at deploy time.
+
+## Pages
+
+- [/](https://validator.kineticgain.com/): Kinetic Gain Suite Validator — Paste any AI governance JSON and get a procurement-grade validation report with inline error markers.
+
+## What it validates
+
+Any JSON document carrying one of the ten Kinetic Gain Protocol Suite top-level version fields:
+
+| Version field | Spec | Vertical |
+|---|---|---|
+| `aeo_version` | AEO Protocol | Core |
+| `provenance_version` | Prompt Provenance | Core |
+| `agent_card_version` | Agent Card | Core |
+| `evidence_version` | AI Evidence Format | Core |
+| `tool_card_version` | MCP Tool Card | Core |
+| `tutor_card_version` | AI Tutor Card | EdTech |
+| `disclosure_version` | Student AI Disclosure | EdTech (FERPA / COPPA) |
+| `aup_version` | Classroom AI AUP | EdTech |
+| `clinical_ai_card_version` | Clinical AI Card | HealthTech (FDA SaMD + HIPAA) |
+| `incident_card_version` | AI Incident Card | Cross-cutting (EU AI Act Article 73) |
+
+Files without a recognized version field are flagged as unrecognized rather than failed.
+
+## Companion surfaces
+
+The validator is one of three consumer entry points to the same underlying schemas. Each surface is optimized for a different audience:
+
+- **Web validator (this page)** — buyers and procurement teams who want to paste a vendor's JSON and instantly see what's wrong. Inline error markers in a syntax-highlighted editor, no signup.
+- **CLI**: `npx -y mcp-kinetic-gain validate <files...>` — engineers running validation locally or wiring into pre-commit hooks. Same zod schemas as the MCP server tools.
+- **GitHub Action**: [`mizcausevic-dev/kg-validate-action`](https://github.com/mizcausevic-dev/kg-validate-action) — vendors who want validation to gate every PR. Three lines of YAML, fails the build on schema regressions, emits `::error::` annotations on the offending file.
+
+## Part of the Kinetic Gain Protocol Suite
+
+A family of **10 open JSON specifications** for the answer-engine and agent era — five core (AEO Protocol, Prompt Provenance, Agent Cards, AI Evidence Format, MCP Tool Cards), an EdTech trio (AI Tutor Cards / Student AI Disclosure / Classroom AI AUP), a HealthTech extension (Clinical AI Disclosure / Clinical AI Card), and a cross-cutting AI Incident Card. **Two regulated verticals fully covered; one cross-vertical incident genre.**
+
+- **Front door**: [suite.kineticgain.com](https://suite.kineticgain.com/)
+- **Apex**: [kineticgain.com](https://kineticgain.com/)
+- **Unified MCP server + CLI** (43 tools, 10 specs, v0.5.1, on npm): [github.com/mizcausevic-dev/mcp-kinetic-gain](https://github.com/mizcausevic-dev/mcp-kinetic-gain)
+- **Unified visualizer** (10 renderers): [github.com/mizcausevic-dev/kinetic-gain-visualizer](https://github.com/mizcausevic-dev/kinetic-gain-visualizer)
+- **GitHub Action**: [github.com/mizcausevic-dev/kg-validate-action](https://github.com/mizcausevic-dev/kg-validate-action)
+- **Red-team bench**: [github.com/mizcausevic-dev/prompt-injection-bench](https://github.com/mizcausevic-dev/prompt-injection-bench)
+
+## Author
+
+**Miz Causevic** — Director / Principal Platform Engineering, Boston, MA. Two decades across IBM, CyberArk, Alteryx. Author of the Kinetic Gain Protocol Suite. The entire suite is authored under [github.com/mizcausevic-dev](https://github.com/mizcausevic-dev) in the open.
+
+- Apex: [kineticgain.com](https://kineticgain.com/)
+- LinkedIn: [linkedin.com/in/mirzacausevic](https://www.linkedin.com/in/mirzacausevic/)
+- GitHub: [github.com/mizcausevic-dev](https://github.com/mizcausevic-dev)
