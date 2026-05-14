@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kinetic Gain Suite Validator — verify any vendor's AI governance JSON</title>
-  <meta name="description" content="Paste any Kinetic Gain Protocol Suite JSON document. Get a procurement-grade validation report. Free, zero-install, in-browser." />
+  <meta name="description" content="Paste any Kinetic Gain Protocol Suite JSON document. Get a procurement-grade validation report with inline error markers. Free, zero-install, in-browser." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://validator.kineticgain.com/" />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://validator.kineticgain.com/" />
   <meta property="og:title" content="Kinetic Gain Suite Validator" />
-  <meta property="og:description" content="Paste any AI governance JSON — AI Entity Card, Clinical AI Card, AI Incident Card, Classroom AUP, Student Disclosure, and seven other Kinetic Gain Protocol Suite specs. Get a validation report against the canonical JSON Schema." />
+  <meta property="og:description" content="Paste any AI governance JSON — AI Entity Card, Clinical AI Card, AI Incident Card, Classroom AUP, Student Disclosure, and seven other Kinetic Gain Protocol Suite specs. Get inline schema errors with line numbers." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,6 +25,7 @@
       --cream:      #f6efe1;
       --paper:      #fbf6ea;
       --line:       rgba(125, 100, 60, .18);
+      --line-strong:rgba(125, 100, 60, .32);
       --gold:       #c58b4b;
       --copper:     #b8653c;
       --sage:       #6f7a52;
@@ -34,18 +35,21 @@
       --surface:    rgba(255, 248, 237, .55);
       --surface-strong: rgba(255, 248, 237, .80);
       --shadow:     0 18px 38px rgba(60, 40, 20, .08);
+      --shadow-lg:  0 28px 56px rgba(60, 40, 20, .14);
       --radius:     14px;
       --radius-lg:  22px;
+      --radius-xl:  32px;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --ink:      #f5ecd6;
-        --ink-soft: #d1c4a0;
-        --muted:    #a4977b;
-        --cream:    #1a1812;
-        --paper:    #14120c;
-        --line:     rgba(245, 220, 170, .12);
-        --surface:  rgba(255, 248, 237, .04);
+        --ink:        #f5ecd6;
+        --ink-soft:   #d1c4a0;
+        --muted:      #a4977b;
+        --cream:      #14120c;
+        --paper:      #1a1812;
+        --line:       rgba(245, 220, 170, .12);
+        --line-strong:rgba(245, 220, 170, .22);
+        --surface:    rgba(255, 248, 237, .04);
         --surface-strong: rgba(255, 248, 237, .07);
       }
     }
@@ -63,7 +67,7 @@
     a:hover { color: var(--gold); }
     code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.92em; }
 
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px; }
+    .wrap { max-width: 1300px; margin: 0 auto; padding: 32px 28px 80px; }
 
     header.top { margin-bottom: 28px; }
     .kicker {
@@ -87,16 +91,16 @@
 
     .pair {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.1fr .9fr;
       gap: 22px;
       margin-top: 28px;
     }
-    @media (max-width: 880px) { .pair { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) { .pair { grid-template-columns: 1fr; } }
 
     .panel {
       background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-xl);
       padding: 22px;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -110,47 +114,78 @@
       color: var(--sage);
     }
 
-    textarea#input {
+    #editor-host {
       width: 100%;
-      min-height: 360px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 13px;
-      line-height: 1.55;
-      background: var(--paper);
-      color: var(--ink);
+      height: 480px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      padding: 16px;
-      resize: vertical;
-      outline: none;
-      transition: border-color .15s ease;
+      overflow: hidden;
+      background: var(--paper);
+      position: relative;
     }
-    textarea#input:focus { border-color: var(--copper); }
+    #editor-host .monaco-editor,
+    #editor-host .monaco-editor .overflow-guard { border-radius: var(--radius); }
+
+    .editor-empty-hint {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      pointer-events: none;
+      padding: 24px; text-align: center;
+      color: var(--muted);
+      z-index: 5;
+    }
+    .editor-empty-hint h3 { margin: 12px 0 6px; color: var(--ink-soft); font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+    .editor-empty-hint p { margin: 0; font-size: 13px; max-width: 360px; line-height: 1.55; }
+    .editor-empty-hint .glyph {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--surface-strong); border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--copper);
+    }
+
+    .monaco-loading {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      pointer-events: none;
+    }
+    .monaco-loading::before {
+      content: '';
+      width: 16px; height: 16px;
+      border: 2px solid var(--line-strong);
+      border-top-color: var(--copper);
+      border-radius: 50%;
+      margin-right: 10px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .controls {
       display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center;
     }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 16px; border-radius: 999px;
+      padding: 10px 14px; border-radius: 999px;
       border: 1px solid var(--line);
-      font: inherit; font-weight: 700; font-size: 14px;
+      font: inherit; font-weight: 700; font-size: 13px;
       cursor: pointer; transition: .15s ease;
       background: var(--surface-strong);
       color: var(--ink);
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-    .btn.primary {
-      background: linear-gradient(135deg, var(--gold), var(--copper));
-      color: #fff8ed;
-      border-color: rgba(255,255,255,.26);
-      box-shadow: 0 12px 28px rgba(184,101,60,.22);
-    }
-    .btn.primary:hover { box-shadow: 0 16px 36px rgba(184,101,60,.30); }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow); }
     .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 
+    .auto-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
+    }
+    .auto-indicator .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 3px rgba(111, 122, 82, .15); }
+    .auto-indicator.busy .dot { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .4; } }
+
     .examples {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px;
     }
     .examples small {
       width: 100%; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;
@@ -167,35 +202,63 @@
     }
     .ex-pill:hover { border-color: var(--copper); color: var(--copper); }
 
-    /* Result panel */
-    #result { min-height: 360px; display: flex; flex-direction: column; gap: 14px; }
-    .status-banner {
-      padding: 16px 18px; border-radius: var(--radius);
-      display: flex; align-items: center; gap: 12px;
-      border: 1px solid;
-    }
-    .status-banner .icon { font-size: 22px; line-height: 1; }
-    .status-banner .label { font-weight: 800; font-size: 14px; letter-spacing: .04em; }
-    .status-banner .detail { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
-    .status-banner.pass { background: rgba(79, 107, 72, .10); border-color: rgba(79, 107, 72, .35); }
-    .status-banner.pass .label { color: var(--emerald); }
-    .status-banner.fail { background: rgba(185, 79, 79, .10); border-color: rgba(185, 79, 79, .35); }
-    .status-banner.fail .label { color: var(--rose); }
-    .status-banner.warn { background: rgba(199, 154, 58, .10); border-color: rgba(199, 154, 58, .40); }
-    .status-banner.warn .label { color: var(--amber); }
-    .status-banner.idle { background: var(--surface); border-color: var(--line); }
-    .status-banner.idle .label { color: var(--muted); }
+    /* Result panel — bento layout */
+    #result { display: flex; flex-direction: column; gap: 14px; }
 
-    .meta-row {
-      display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;
-      font-size: 13px;
-      padding: 14px 18px;
-      background: var(--paper);
+    .hero {
+      position: relative;
+      padding: 24px 26px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: var(--surface-strong);
+      overflow: hidden;
+    }
+    .hero.pass { background: linear-gradient(135deg, rgba(79, 107, 72, .15), rgba(111, 122, 82, .06)); border-color: rgba(79, 107, 72, .35); }
+    .hero.fail { background: linear-gradient(135deg, rgba(185, 79, 79, .14), rgba(199, 154, 58, .04)); border-color: rgba(185, 79, 79, .35); }
+    .hero.warn { background: linear-gradient(135deg, rgba(199, 154, 58, .15), rgba(255, 248, 237, .04)); border-color: rgba(199, 154, 58, .40); }
+    .hero.idle { background: var(--surface); border-color: var(--line); }
+
+    .hero-label {
+      font-size: 10px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--ink-soft);
+    }
+    .hero.pass .hero-label { color: var(--emerald); }
+    .hero.fail .hero-label { color: var(--rose); }
+    .hero.warn .hero-label { color: var(--amber); }
+    .hero.idle .hero-label { color: var(--muted); }
+
+    .hero-title {
+      font-size: 28px; font-weight: 800; letter-spacing: -.02em;
+      margin: 6px 0 6px; line-height: 1.1;
+      color: var(--ink);
+    }
+    .hero-detail { color: var(--ink-soft); font-size: 14px; line-height: 1.5; max-width: 460px; margin: 0; }
+
+    .hero-decoration {
+      position: absolute; right: -16px; top: -28px;
+      font-size: 200px; font-weight: 800; line-height: 1;
+      letter-spacing: -.08em;
+      opacity: .07; pointer-events: none;
+      font-family: 'Instrument Serif', serif;
+    }
+    .hero.pass .hero-decoration { color: var(--emerald); }
+    .hero.fail .hero-decoration { color: var(--rose); }
+    .hero.warn .hero-decoration { color: var(--amber); }
+    .hero.idle .hero-decoration { color: var(--muted); }
+
+    .meta-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .meta-tile {
+      padding: 12px 14px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
+      background: var(--paper);
     }
-    .meta-row dt { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; align-self: center; }
-    .meta-row dd { margin: 0; color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+    .meta-tile dt { font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .meta-tile dd { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); word-break: break-word; }
 
     .err-list {
       list-style: none;
@@ -205,16 +268,35 @@
       border-radius: var(--radius);
       overflow: hidden;
     }
+    .err-head {
+      padding: 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--rose);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .err-head .count { color: var(--muted); }
     .err-list li {
-      padding: 12px 18px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--line);
       font-size: 13px;
+      display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
     }
     .err-list li:last-child { border-bottom: none; }
-    .err-list .err-path { font-family: 'JetBrains Mono', monospace; color: var(--copper); font-weight: 700; }
-    .err-list .err-msg { color: var(--ink-soft); }
+    .err-list .err-path { font-family: 'JetBrains Mono', monospace; color: var(--copper); font-weight: 700; flex-shrink: 0; }
+    .err-list .err-msg { color: var(--ink-soft); flex: 1; min-width: 200px; }
+    .err-list li button.jump {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      padding: 3px 8px; border-radius: 999px;
+      border: 1px solid var(--line); background: transparent; color: var(--muted);
+      cursor: pointer; transition: .15s ease;
+      flex-shrink: 0;
+    }
+    .err-list li button.jump:hover { color: var(--copper); border-color: var(--copper); }
 
-    .hint { color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; line-height: 1.5; }
 
     footer {
       margin-top: 56px;
@@ -233,32 +315,31 @@
     <header class="top">
       <div class="kicker">Kinetic Gain Protocol Suite</div>
       <h1>Validate any AI governance JSON, <span class="serif">in your browser.</span></h1>
-      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the ten Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. No upload, no server, no signup — everything runs locally.</p>
+      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the ten Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. Errors surface as inline markers in the editor, with line numbers. No upload, no server, no signup.</p>
     </header>
 
     <div class="pair">
       <section class="panel">
         <div class="panel-head">
           <span class="panel-title">Input · paste Suite JSON</span>
-          <button id="clearBtn" class="btn" type="button">Clear</button>
+          <span id="autoIndicator" class="auto-indicator"><span class="dot"></span><span id="autoLabel">Auto-validate idle</span></span>
         </div>
-        <textarea id="input" spellcheck="false" placeholder='Paste a JSON document with a Suite version field, e.g.:
-
-{
-  "aeo_version": "0.1",
-  "entity": { ... },
-  "authority": { ... },
-  "claims": [ ... ]
-}
-
-Or pick an example below.'></textarea>
+        <div id="editor-host">
+          <div class="monaco-loading" id="editorLoading">Loading editor</div>
+          <div class="editor-empty-hint" id="emptyHint">
+            <div class="glyph">{ }</div>
+            <h3>Paste a Suite JSON document</h3>
+            <p>Or pick an example below. Inline errors appear in the gutter as you type.</p>
+          </div>
+        </div>
         <div class="controls">
-          <button id="validateBtn" class="btn primary" type="button">Validate</button>
+          <button id="formatBtn" class="btn" type="button" disabled>Format JSON</button>
+          <button id="clearBtn"  class="btn" type="button" disabled>Clear</button>
           <button id="copyResultBtn" class="btn" type="button" disabled>Copy result as JSON</button>
         </div>
         <div class="examples">
           <small>Try an example</small>
-          <!-- example buttons injected by the script -->
+          <!-- example pills injected by the script -->
         </div>
       </section>
 
@@ -267,14 +348,13 @@ Or pick an example below.'></textarea>
           <span class="panel-title">Validation report</span>
         </div>
         <div id="result">
-          <div class="status-banner idle">
-            <span class="icon">○</span>
-            <div>
-              <div class="label">Ready</div>
-              <div class="detail">Paste a Suite document on the left, then click Validate.</div>
-            </div>
+          <div class="hero idle">
+            <div class="hero-decoration">○</div>
+            <div class="hero-label">Ready</div>
+            <h2 class="hero-title">Paste Suite JSON</h2>
+            <p class="hero-detail">Validation runs automatically as you type. All ten spec schemas are bundled with this page — nothing is uploaded.</p>
           </div>
-          <p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser via the same JSON Schema 2020-12 documents shipped in the spec repos on GitHub. Nothing is uploaded or logged.</p>
+          <p class="hint">The version field at the top level of your document selects which of the ten spec schemas validates it. Errors include both the JSON path and the line number for easy navigation.</p>
         </div>
       </section>
     </div>
@@ -284,6 +364,7 @@ Or pick an example below.'></textarea>
         <a href="https://suite.kineticgain.com/">Suite hub</a>
         <a href="https://github.com/mizcausevic-dev/mcp-kinetic-gain">MCP server</a>
         <a href="https://github.com/mizcausevic-dev/kg-validate-action">GitHub Action</a>
+        <a href="https://github.com/mizcausevic-dev/kg-hosted-validator">Validator source</a>
         <a href="https://www.npmjs.com/package/mcp-kinetic-gain">npm: mcp-kinetic-gain</a>
         <a href="https://kineticgain.com/">Kinetic Gain LLC</a>
       </div>
@@ -294,11 +375,117 @@ Or pick an example below.'></textarea>
   <script type="application/json" id="schemas-blob">__SCHEMAS_PLACEHOLDER__</script>
   <script type="application/json" id="examples-blob">__EXAMPLES_PLACEHOLDER__</script>
 
+  <!-- Monaco editor via CDN. AMD-style loader; workers run via a data-URL shim so
+       we don't need same-origin worker files (CORS-safe). -->
+  <script>
+    self.MonacoEnvironment = {
+      getWorkerUrl: function () {
+        return 'data:text/javascript;charset=utf-8,' + encodeURIComponent([
+          "self.MonacoEnvironment = { baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/' };",
+          "importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/base/worker/workerMain.js');"
+        ].join('\n'));
+      }
+    };
+    window.kgEditorReady = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js';
+      s.onerror = function () { reject(new Error('Monaco loader failed to download.')); };
+      s.onload = function () {
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+          monaco.editor.defineTheme('kg-warm-light', {
+            base: 'vs',
+            inherit: true,
+            rules: [
+              { token: '',                  foreground: '2a2418' },
+              { token: 'string.key.json',   foreground: '6f7a52', fontStyle: 'bold' },
+              { token: 'string.value.json', foreground: 'b8653c' },
+              { token: 'number',            foreground: '4f6b48' },
+              { token: 'keyword.json',      foreground: 'c58b4b', fontStyle: 'bold' },
+              { token: 'delimiter',         foreground: '8a7e63' }
+            ],
+            colors: {
+              'editor.background':                  '#fbf6ea',
+              'editor.foreground':                  '#2a2418',
+              'editorLineNumber.foreground':        '#bbac8a',
+              'editorLineNumber.activeForeground':  '#8a7e63',
+              'editor.lineHighlightBackground':     '#f1e8d0',
+              'editor.selectionBackground':         '#e6d8b3',
+              'editor.inactiveSelectionBackground': '#efe4c4',
+              'editorIndentGuide.background':       '#e8dcbc',
+              'editorIndentGuide.activeBackground': '#c58b4b',
+              'editorCursor.foreground':            '#b8653c',
+              'editorError.foreground':             '#b94f4f',
+              'editorWarning.foreground':           '#c79a3a',
+              'editorGutter.background':            '#f6efe1'
+            }
+          });
+          monaco.editor.defineTheme('kg-warm-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+              { token: '',                  foreground: 'f5ecd6' },
+              { token: 'string.key.json',   foreground: 'a4b385', fontStyle: 'bold' },
+              { token: 'string.value.json', foreground: 'd9885f' },
+              { token: 'number',            foreground: '85a07c' },
+              { token: 'keyword.json',      foreground: 'd9a86e', fontStyle: 'bold' },
+              { token: 'delimiter',         foreground: 'a4977b' }
+            ],
+            colors: {
+              'editor.background':              '#1a1812',
+              'editor.foreground':              '#f5ecd6',
+              'editorLineNumber.foreground':    '#6f6342',
+              'editor.lineHighlightBackground': '#221f17',
+              'editor.selectionBackground':     '#3a2f1e',
+              'editorGutter.background':        '#14120c'
+            }
+          });
+          // We use AJV for validation, so disable Monaco's built-in JSON validator.
+          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: false,
+            allowComments: false,
+            schemas: [],
+            enableSchemaRequest: false
+          });
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var editor = monaco.editor.create(document.getElementById('editor-host'), {
+            value: '',
+            language: 'json',
+            theme: prefersDark ? 'kg-warm-dark' : 'kg-warm-light',
+            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+            fontSize: 13,
+            lineNumbers: 'on',
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            padding: { top: 16, bottom: 16 },
+            renderLineHighlight: 'gutter',
+            roundedSelection: true,
+            wordWrap: 'off'
+          });
+          if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+              monaco.editor.setTheme(e.matches ? 'kg-warm-dark' : 'kg-warm-light');
+            });
+          }
+          var loadingEl = document.getElementById('editorLoading');
+          if (loadingEl) loadingEl.remove();
+          window.kgEditor = editor;
+          window.kgMonaco = monaco;
+          resolve();
+        });
+      };
+      document.head.appendChild(s);
+    });
+  </script>
+
   <script type="importmap">
   {
     "imports": {
-      "ajv": "https://esm.sh/ajv@8/dist/2020",
-      "ajv-formats": "https://esm.sh/ajv-formats@3"
+      "ajv":          "https://esm.sh/ajv@8/dist/2020",
+      "ajv-formats":  "https://esm.sh/ajv-formats@3",
+      "jsonc-parser": "https://esm.sh/jsonc-parser@3"
     }
   }
   </script>
@@ -306,8 +493,12 @@ Or pick an example below.'></textarea>
   <script type="module">
     import Ajv2020 from "ajv";
     import addFormats from "ajv-formats";
+    import { parseTree, findNodeAtLocation } from "jsonc-parser";
 
-    // Discriminator: version-field name -> bundled schema key + display name.
+    await window.kgEditorReady;
+    const editor = window.kgEditor;
+    const monaco = window.kgMonaco;
+
     const SPECS = [
       { versionField: "aeo_version",              schemaKey: "aeo",                   displayName: "AEO Protocol" },
       { versionField: "provenance_version",       schemaKey: "provenance",            displayName: "Prompt Provenance" },
@@ -318,7 +509,7 @@ Or pick an example below.'></textarea>
       { versionField: "disclosure_version",       schemaKey: "student-ai-disclosure", displayName: "Student AI Disclosure" },
       { versionField: "aup_version",              schemaKey: "aup",                   displayName: "Classroom AI AUP" },
       { versionField: "clinical_ai_card_version", schemaKey: "clinical-ai-card",      displayName: "Clinical AI Card" },
-      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" },
+      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" }
     ];
 
     const schemas  = JSON.parse(document.getElementById("schemas-blob").textContent);
@@ -326,9 +517,8 @@ Or pick an example below.'></textarea>
 
     const ajv = new Ajv2020({ strict: false, allErrors: true, allowUnionTypes: true });
     addFormats(ajv);
-    // Pre-compile every schema once; we'll look up by spec key.
     const validators = Object.fromEntries(
-      Object.entries(schemas).map(([key, schema]) => [key, ajv.compile(schema)]),
+      Object.entries(schemas).map(([key, schema]) => [key, ajv.compile(schema)])
     );
 
     function detectSpec(doc) {
@@ -339,16 +529,29 @@ Or pick an example below.'></textarea>
       return null;
     }
 
-    const $input        = document.getElementById("input");
-    const $validateBtn  = document.getElementById("validateBtn");
-    const $clearBtn     = document.getElementById("clearBtn");
-    const $copyBtn      = document.getElementById("copyResultBtn");
-    const $result       = document.getElementById("result");
-    const $examples     = document.querySelector(".examples");
-    let lastResultJson  = null;
+    // Convert AJV instancePath ("/entity/name" or "/items/0/key") to segments;
+    // numeric indices become numbers so jsonc-parser can address array entries.
+    function instancePathToSegments(instancePath) {
+      if (!instancePath) return [];
+      return instancePath.split("/").filter(Boolean).map((s) => {
+        const n = Number(s);
+        return Number.isInteger(n) && String(n) === s ? n : s;
+      });
+    }
 
-    // Inject example buttons. One per spec, ordered by SPECS array for narrative
-    // (core specs first, vertical extensions next, cross-cutting last).
+    const $result        = document.getElementById("result");
+    const $emptyHint     = document.getElementById("emptyHint");
+    const $formatBtn     = document.getElementById("formatBtn");
+    const $clearBtn      = document.getElementById("clearBtn");
+    const $copyBtn       = document.getElementById("copyResultBtn");
+    const $examples      = document.querySelector(".examples");
+    const $autoIndicator = document.getElementById("autoIndicator");
+    const $autoLabel     = document.getElementById("autoLabel");
+
+    let lastResultJson = null;
+    let lastResultKind = "idle";
+    let markerLocations = [];
+
     for (const spec of SPECS) {
       const ex = examples[spec.schemaKey];
       if (!ex) continue;
@@ -357,126 +560,229 @@ Or pick an example below.'></textarea>
       btn.type = "button";
       btn.textContent = spec.displayName;
       btn.addEventListener("click", () => {
-        $input.value = JSON.stringify(ex.doc, null, 2);
-        $input.focus();
-        // Auto-validate so the user immediately sees a pass result.
-        runValidate();
+        editor.setValue(JSON.stringify(ex.doc, null, 2));
+        editor.focus();
       });
       $examples.appendChild(btn);
     }
 
-    function renderBanner(kind, label, detail) {
-      const icon = kind === "pass" ? "✓" : kind === "fail" ? "✕" : kind === "warn" ? "!" : "○";
-      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+    function escapeHtml(s) {
+      return String(s).replace(/[<>&"]/g, (c) => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;", "\"":"&quot;" })[c]);
+    }
+
+    function renderHero(kind, label, title, detail) {
+      const glyph = kind === "pass" ? "✓" : kind === "fail" ? "✕" : kind === "warn" ? "!" : "○";
       return `
-        <div class="status-banner ${kind}">
-          <span class="icon">${icon}</span>
-          <div>
-            <div class="label">${escape(label)}</div>
-            <div class="detail">${escape(detail)}</div>
-          </div>
+        <div class="hero ${kind}">
+          <div class="hero-decoration">${glyph}</div>
+          <div class="hero-label">${escapeHtml(label)}</div>
+          <h2 class="hero-title">${escapeHtml(title)}</h2>
+          <p class="hero-detail">${escapeHtml(detail)}</p>
         </div>`;
     }
 
-    function renderMeta(spec, versionValue, errorCount) {
-      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
-      return `
-        <dl class="meta-row">
-          <dt>Spec</dt>            <dd>${escape(spec.displayName)}</dd>
-          <dt>Version field</dt>   <dd><code>${escape(spec.versionField)}</code> = "${escape(versionValue)}"</dd>
-          <dt>Schema key</dt>      <dd><code>${escape(spec.schemaKey)}.schema.json</code></dd>
-          <dt>Schema errors</dt>   <dd>${errorCount}</dd>
-        </dl>`;
+    function renderMetaStrip(tiles) {
+      const html = tiles.map(([dt, dd]) => `
+        <div class="meta-tile">
+          <dt>${escapeHtml(dt)}</dt>
+          <dd>${dd}</dd>
+        </div>`).join("");
+      return `<div class="meta-strip">${html}</div>`;
     }
 
     function renderErrors(errors) {
-      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
-      const items = errors.map((e) => {
+      const head = `
+        <div class="err-head">
+          <span>Schema violations</span>
+          <span class="count">${errors.length}</span>
+        </div>`;
+      const items = errors.map((e, i) => {
         const path = e.instancePath && e.instancePath.length ? e.instancePath : "(root)";
-        const params = e.params && Object.keys(e.params).length ? ` <span class="err-msg">[${escape(JSON.stringify(e.params))}]</span>` : "";
-        return `<li><span class="err-path">${escape(path)}</span> <span class="err-msg">${escape(e.message || e.keyword)}</span>${params}</li>`;
+        return `
+          <li>
+            <span class="err-path">${escapeHtml(path)}</span>
+            <span class="err-msg">${escapeHtml(e.message || e.keyword || "invalid")}</span>
+            <button class="jump" type="button" data-err-idx="${i}">jump</button>
+          </li>`;
       }).join("");
-      return `<ul class="err-list">${items}</ul>`;
+      return `<ul class="err-list">${head}${items}</ul>`;
     }
 
-    function setResult(html, copyableJson) {
+    function applyMarkers(errors, text) {
+      const model = editor.getModel();
+      if (!model) { markerLocations = []; return; }
+      monaco.editor.setModelMarkers(model, "kg-validator", []);
+      markerLocations = [];
+
+      if (!errors || errors.length === 0) return;
+      const tree = parseTree(text || "");
+      if (!tree) return;
+
+      const markers = errors.map((err) => {
+        let startOffset = 0;
+        let length      = 1;
+        const segments = instancePathToSegments(err.instancePath);
+        const node = segments.length === 0 ? tree : findNodeAtLocation(tree, segments);
+        if (node) { startOffset = node.offset; length = Math.max(node.length, 1); }
+        const startPos = model.getPositionAt(startOffset);
+        const endPos   = model.getPositionAt(startOffset + length);
+        markerLocations.push({ startLineNumber: startPos.lineNumber, startColumn: startPos.column });
+        return {
+          severity: monaco.MarkerSeverity.Error,
+          message: `${err.instancePath || "(root)"}  ${err.message || err.keyword || "invalid"}`,
+          startLineNumber: startPos.lineNumber,
+          startColumn:     startPos.column,
+          endLineNumber:   endPos.lineNumber,
+          endColumn:       endPos.column
+        };
+      });
+      monaco.editor.setModelMarkers(model, "kg-validator", markers);
+    }
+
+    function setResult(html, copyableJson, kind) {
       $result.innerHTML = html;
       lastResultJson = copyableJson;
+      lastResultKind = kind || "idle";
       $copyBtn.disabled = copyableJson === null;
+      // Wire jump buttons on freshly rendered error rows.
+      $result.querySelectorAll("button.jump").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-err-idx"));
+          const loc = markerLocations[idx];
+          if (!loc) return;
+          editor.revealLineInCenter(loc.startLineNumber);
+          editor.setPosition({ lineNumber: loc.startLineNumber, column: loc.startColumn });
+          editor.focus();
+        });
+      });
+    }
+
+    function showIdle() {
+      setResult(
+        renderHero("idle", "Ready", "Paste Suite JSON", "Validation runs automatically as you type. All ten spec schemas are bundled with this page — nothing is uploaded.")
+        + `<p class="hint">The version field at the top level of your document selects which of the ten spec schemas validates it. Errors include both the JSON path and the line number in the editor for easy navigation.</p>`,
+        null,
+        "idle"
+      );
+      applyMarkers([], "");
     }
 
     function runValidate() {
-      const text = $input.value.trim();
-      if (!text) {
-        setResult(
-          renderBanner("idle", "Empty input", "Paste a Suite JSON document or click an example pill below.")
-          + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
-          null,
-        );
-        return;
-      }
+      const text = editor.getValue();
+      $emptyHint.style.display = text.trim().length === 0 ? "flex" : "none";
+      $formatBtn.disabled = text.trim().length === 0;
+      $clearBtn.disabled  = text.length === 0;
+
+      if (!text.trim()) { showIdle(); return; }
+
       let doc;
       try {
         doc = JSON.parse(text);
       } catch (err) {
         setResult(
-          renderBanner("fail", "Parse error", "The input is not valid JSON.")
-          + `<dl class="meta-row"><dt>Parser said</dt><dd>${String(err.message).replace(/</g, "&lt;")}</dd></dl>`,
+          renderHero("fail", "Parse error", "Invalid JSON", "The input is not valid JSON. Fix the syntax in the editor to continue.")
+          + renderMetaStrip([
+              ["Parser said", `<span style="color:var(--rose);">${escapeHtml(err.message)}</span>`]
+            ]),
           { ok: false, parseError: String(err.message) },
+          "fail"
         );
+        applyMarkers([], text);
         return;
       }
+
       const spec = detectSpec(doc);
       if (!spec) {
+        const fields = SPECS.map((s) => `<code>${escapeHtml(s.versionField)}</code>`).join(", ");
         setResult(
-          renderBanner("warn", "No recognized Suite version field", "Add one of the ten Suite version fields at the top level to validate.")
-          + `<dl class="meta-row"><dt>Expected one of</dt><dd>${SPECS.map(s => `<code>${s.versionField}</code>`).join(", ")}</dd></dl>`,
+          renderHero("warn", "Unrecognized document", "No Suite version field", "Add one of the ten Suite version fields at the top level of your JSON to validate.")
+          + renderMetaStrip([
+              ["Expected one of", `<span style="font-size:11px;line-height:1.6;">${fields}</span>`]
+            ]),
           { ok: false, unrecognized: true },
+          "warn"
         );
+        applyMarkers([], text);
         return;
       }
+
       const validate = validators[spec.schemaKey];
       const ok = validate(doc);
       const versionValue = doc[spec.versionField];
+
       if (ok) {
         setResult(
-          renderBanner("pass", "Valid", `${spec.displayName} document conforms to its JSON Schema.`)
-          + renderMeta(spec, versionValue, 0),
+          renderHero("pass", "Valid", `${spec.displayName} document`, `Conforms to the canonical JSON Schema 2020-12 for ${spec.displayName}.`)
+          + renderMetaStrip([
+              ["Spec",          escapeHtml(spec.displayName)],
+              ["Version field", `<code>${escapeHtml(spec.versionField)}</code> · "${escapeHtml(versionValue)}"`],
+              ["Schema",        `<code>${escapeHtml(spec.schemaKey)}.schema.json</code>`],
+              ["Errors",        "0"]
+            ]),
           { ok: true, spec: spec.schemaKey, version: versionValue },
+          "pass"
         );
+        applyMarkers([], text);
       } else {
         const errors = validate.errors || [];
         setResult(
-          renderBanner("fail", "Schema violations", `${errors.length} error${errors.length === 1 ? "" : "s"} found against the ${spec.displayName} schema.`)
-          + renderMeta(spec, versionValue, errors.length)
+          renderHero("fail", "Schema violations", `${errors.length} error${errors.length === 1 ? "" : "s"}`, `Found in the ${spec.displayName} document. Use the "jump" links to navigate to the offending lines.`)
+          + renderMetaStrip([
+              ["Spec",          escapeHtml(spec.displayName)],
+              ["Version field", `<code>${escapeHtml(spec.versionField)}</code> · "${escapeHtml(versionValue)}"`],
+              ["Schema",        `<code>${escapeHtml(spec.schemaKey)}.schema.json</code>`],
+              ["Errors",        String(errors.length)]
+            ])
           + renderErrors(errors),
           {
             ok: false,
             spec: spec.schemaKey,
             version: versionValue,
-            errors: errors.map(e => ({ path: e.instancePath || "(root)", keyword: e.keyword, message: e.message, params: e.params })),
+            errors: errors.map((e) => ({ path: e.instancePath || "(root)", keyword: e.keyword, message: e.message, params: e.params }))
           },
+          "fail"
         );
+        applyMarkers(errors, text);
       }
     }
 
-    $validateBtn.addEventListener("click", runValidate);
-    $clearBtn.addEventListener("click", () => {
-      $input.value = "";
-      setResult(
-        renderBanner("idle", "Ready", "Paste a Suite document on the left, then click Validate.")
-        + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
-        null,
-      );
-      $input.focus();
-    });
-    $input.addEventListener("keydown", (e) => {
-      // Cmd/Ctrl + Enter triggers validate.
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-        e.preventDefault();
+    // Debounced auto-validate on edit.
+    let debounceTimer = null;
+    editor.onDidChangeModelContent(() => {
+      $autoIndicator.classList.add("busy");
+      $autoLabel.textContent = "Validating";
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
         runValidate();
-      }
+        $autoIndicator.classList.remove("busy");
+        $autoLabel.textContent =
+          lastResultKind === "pass" ? "Valid"      :
+          lastResultKind === "fail" ? "Invalid"    :
+          lastResultKind === "warn" ? "Unrecognized" :
+                                      "Auto-validate idle";
+      }, 400);
     });
+
+    $formatBtn.addEventListener("click", async () => {
+      // Prefer Monaco's built-in formatter; fall back to JSON.stringify pretty-print.
+      try {
+        const action = editor.getAction("editor.action.formatDocument");
+        if (action) await action.run();
+      } catch { /* ignore */ }
+      const cur = editor.getValue();
+      try {
+        const parsed = JSON.parse(cur);
+        const pretty = JSON.stringify(parsed, null, 2);
+        if (pretty !== cur) editor.setValue(pretty);
+      } catch { /* invalid JSON — leave it alone */ }
+    });
+
+    $clearBtn.addEventListener("click", () => {
+      editor.setValue("");
+      showIdle();
+      editor.focus();
+    });
+
     $copyBtn.addEventListener("click", async () => {
       if (lastResultJson === null) return;
       try {
@@ -484,10 +790,14 @@ Or pick an example below.'></textarea>
         const original = $copyBtn.textContent;
         $copyBtn.textContent = "Copied";
         setTimeout(() => { $copyBtn.textContent = original; }, 1200);
-      } catch {
-        // Clipboard API unavailable — ignore.
-      }
+      } catch { /* clipboard unavailable */ }
     });
+
+    // Initial idle state.
+    showIdle();
+    $emptyHint.style.display = "flex";
+    $formatBtn.disabled = true;
+    $clearBtn.disabled  = true;
   </script>
 </body>
 </html>
