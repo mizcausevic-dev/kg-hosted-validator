@@ -1,0 +1,91 @@
+name: Deploy to Hostinger
+
+# Syncs the built single-file validator to validator.kineticgain.com on every
+# push to main. Only the four runtime artifacts are deployed; source files
+# (template.html, build.py, README, LICENSE, .git, .github) are excluded.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: FTP-sync to validator.kineticgain.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify deploy artifacts
+        run: |
+          test -f index.html      || (echo "FAIL: missing index.html"     && exit 1)
+          test -f robots.txt      || (echo "FAIL: missing robots.txt"     && exit 1)
+          test -f sitemap.xml     || (echo "FAIL: missing sitemap.xml"    && exit 1)
+          test -f llms.txt        || (echo "FAIL: missing llms.txt"       && exit 1)
+          grep -q "Kinetic Gain Suite Validator" index.html || (echo "FAIL: index.html missing brand string" && exit 1)
+          echo "OK: 4 deploy artifacts present and valid."
+          ls -lah index.html robots.txt sitemap.xml llms.txt
+
+      - name: FTP-Deploy to /validator/ (first attempt)
+        id: deploy
+        timeout-minutes: 5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        continue-on-error: true
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          protocol: ftps
+          port: 21
+          timeout: 60000
+          local-dir: ./
+          server-dir: /validator/
+          dangerous-clean-slate: false
+          log-level: standard
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.DS_Store
+            **/README.md
+            **/LICENSE
+            **/template.html
+            **/build.py
+            **/_examples/**
+            **/_examples-min.json
+            **/_schemas-min.json
+            **/_schemas-merged.json
+
+      - name: Retry FTP-Deploy if first attempt failed
+        if: steps.deploy.outcome == 'failure'
+        timeout-minutes: 5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          protocol: ftps
+          port: 21
+          timeout: 90000
+          local-dir: ./
+          server-dir: /validator/
+          dangerous-clean-slate: false
+          log-level: verbose
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.DS_Store
+            **/README.md
+            **/LICENSE
+            **/template.html
+            **/build.py
+            **/_examples/**
+            **/_examples-min.json
+            **/_schemas-min.json
+            **/_schemas-merged.json
