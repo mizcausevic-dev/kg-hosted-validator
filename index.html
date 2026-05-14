@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kinetic Gain Suite Validator — verify any vendor's AI governance JSON</title>
+  <meta name="description" content="Paste any Kinetic Gain Protocol Suite JSON document. Get a procurement-grade validation report. Free, zero-install, in-browser." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://validator.kineticgain.com/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://validator.kineticgain.com/" />
+  <meta property="og:title" content="Kinetic Gain Suite Validator" />
+  <meta property="og:description" content="Paste any AI governance JSON — AI Entity Card, Clinical AI Card, AI Incident Card, Classroom AUP, Student Disclosure, and seven other Kinetic Gain Protocol Suite specs. Get a validation report against the canonical JSON Schema." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink:        #2a2418;
+      --ink-soft:   #5a513f;
+      --muted:      #8a7e63;
+      --cream:      #f6efe1;
+      --paper:      #fbf6ea;
+      --line:       rgba(125, 100, 60, .18);
+      --gold:       #c58b4b;
+      --copper:     #b8653c;
+      --sage:       #6f7a52;
+      --emerald:    #4f6b48;
+      --rose:       #b94f4f;
+      --amber:      #c79a3a;
+      --surface:    rgba(255, 248, 237, .55);
+      --surface-strong: rgba(255, 248, 237, .80);
+      --shadow:     0 18px 38px rgba(60, 40, 20, .08);
+      --radius:     14px;
+      --radius-lg:  22px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:      #f5ecd6;
+        --ink-soft: #d1c4a0;
+        --muted:    #a4977b;
+        --cream:    #1a1812;
+        --paper:    #14120c;
+        --line:     rgba(245, 220, 170, .12);
+        --surface:  rgba(255, 248, 237, .04);
+        --surface-strong: rgba(255, 248, 237, .07);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--copper); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--gold); }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.92em; }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px; }
+
+    header.top { margin-bottom: 28px; }
+    .kicker {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--copper);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.1;
+      margin: 0 0 12px;
+      letter-spacing: -.02em;
+    }
+    h1 .serif { font-family: 'Instrument Serif', serif; font-weight: 400; }
+    .lede { color: var(--ink-soft); font-size: 17px; max-width: 720px; margin: 0; }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 28px;
+    }
+    @media (max-width: 880px) { .pair { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .panel-title {
+      font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--sage);
+    }
+
+    textarea#input {
+      width: 100%;
+      min-height: 360px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      background: var(--paper);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+    textarea#input:focus { border-color: var(--copper); }
+
+    .controls {
+      display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 16px; border-radius: 999px;
+      border: 1px solid var(--line);
+      font: inherit; font-weight: 700; font-size: 14px;
+      cursor: pointer; transition: .15s ease;
+      background: var(--surface-strong);
+      color: var(--ink);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--gold), var(--copper));
+      color: #fff8ed;
+      border-color: rgba(255,255,255,.26);
+      box-shadow: 0 12px 28px rgba(184,101,60,.22);
+    }
+    .btn.primary:hover { box-shadow: 0 16px 36px rgba(184,101,60,.30); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .examples {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;
+    }
+    .examples small {
+      width: 100%; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;
+    }
+    .ex-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 5px 10px; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: .15s ease;
+    }
+    .ex-pill:hover { border-color: var(--copper); color: var(--copper); }
+
+    /* Result panel */
+    #result { min-height: 360px; display: flex; flex-direction: column; gap: 14px; }
+    .status-banner {
+      padding: 16px 18px; border-radius: var(--radius);
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid;
+    }
+    .status-banner .icon { font-size: 22px; line-height: 1; }
+    .status-banner .label { font-weight: 800; font-size: 14px; letter-spacing: .04em; }
+    .status-banner .detail { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+    .status-banner.pass { background: rgba(79, 107, 72, .10); border-color: rgba(79, 107, 72, .35); }
+    .status-banner.pass .label { color: var(--emerald); }
+    .status-banner.fail { background: rgba(185, 79, 79, .10); border-color: rgba(185, 79, 79, .35); }
+    .status-banner.fail .label { color: var(--rose); }
+    .status-banner.warn { background: rgba(199, 154, 58, .10); border-color: rgba(199, 154, 58, .40); }
+    .status-banner.warn .label { color: var(--amber); }
+    .status-banner.idle { background: var(--surface); border-color: var(--line); }
+    .status-banner.idle .label { color: var(--muted); }
+
+    .meta-row {
+      display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;
+      font-size: 13px;
+      padding: 14px 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .meta-row dt { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; align-self: center; }
+    .meta-row dd { margin: 0; color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .err-list {
+      list-style: none;
+      margin: 0; padding: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .err-list li {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .err-list li:last-child { border-bottom: none; }
+    .err-list .err-path { font-family: 'JetBrains Mono', monospace; color: var(--copper); font-weight: 700; }
+    .err-list .err-msg { color: var(--ink-soft); }
+
+    .hint { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+    footer {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    footer .links { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
+    footer .links a { color: var(--ink-soft); }
+    footer small { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="kicker">Kinetic Gain Protocol Suite</div>
+      <h1>Validate any AI governance JSON, <span class="serif">in your browser.</span></h1>
+      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the ten Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. No upload, no server, no signup — everything runs locally.</p>
+    </header>
+
+    <div class="pair">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input · paste Suite JSON</span>
+          <button id="clearBtn" class="btn" type="button">Clear</button>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder='Paste a JSON document with a Suite version field, e.g.:
+
+{
+  "aeo_version": "0.1",
+  "entity": { ... },
+  "authority": { ... },
+  "claims": [ ... ]
+}
+
+Or pick an example below.'></textarea>
+        <div class="controls">
+          <button id="validateBtn" class="btn primary" type="button">Validate</button>
+          <button id="copyResultBtn" class="btn" type="button" disabled>Copy result as JSON</button>
+        </div>
+        <div class="examples">
+          <small>Try an example</small>
+          <!-- example buttons injected by the script -->
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Validation report</span>
+        </div>
+        <div id="result">
+          <div class="status-banner idle">
+            <span class="icon">○</span>
+            <div>
+              <div class="label">Ready</div>
+              <div class="detail">Paste a Suite document on the left, then click Validate.</div>
+            </div>
+          </div>
+          <p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser via the same JSON Schema 2020-12 documents shipped in the spec repos on GitHub. Nothing is uploaded or logged.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="links">
+        <a href="https://suite.kineticgain.com/">Suite hub</a>
+        <a href="https://github.com/mizcausevic-dev/mcp-kinetic-gain">MCP server</a>
+        <a href="https://github.com/mizcausevic-dev/kg-validate-action">GitHub Action</a>
+        <a href="https://www.npmjs.com/package/mcp-kinetic-gain">npm: mcp-kinetic-gain</a>
+        <a href="https://kineticgain.com/">Kinetic Gain LLC</a>
+      </div>
+      <small>The Kinetic Gain Protocol Suite. Ten open JSON specifications for trustworthy AI in regulated verticals (EdTech, HealthTech, cross-cutting incidents). Specs and SDKs are MIT-licensed; reference implementations like mcp-kinetic-gain are AGPL-3.0. © 2026 Miz Causevic / Kinetic Gain LLC.</small>
+    </footer>
+  </div>
+
+  <script type="application/json" id="schemas-blob">{"aeo":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/aeo-protocol-spec/blob/main/aeo.schema.json","title":"AEO Protocol Declaration Document","description":"Schema for an Answer Engine Optimization (AEO) declaration document, served at /.well-known/aeo.json. See SPEC.md for full semantics.","type":"object","required":["aeo_version","entity","authority","claims"],"additionalProperties":false,"properties":{"aeo_version":{"description":"Protocol version. MUST be '0.1' for documents conforming to this draft.","type":"string","const":"0.1"},"entity":{"$ref":"#/$defs/Entity"},"authority":{"$ref":"#/$defs/Authority"},"claims":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/Claim"}},"citation_preferences":{"$ref":"#/$defs/CitationPreferences"},"answer_constraints":{"$ref":"#/$defs/AnswerConstraints"},"audit":{"$ref":"#/$defs/Audit"}},"$defs":{"Entity":{"type":"object","required":["id","type","name","canonical_url"],"additionalProperties":false,"properties":{"id":{"type":"string","format":"uri","description":"Stable canonical identifier. SHOULD be dereferenceable."},"type":{"type":"string","enum":["Person","Organization","Product","Place","Concept"]},"name":{"type":"string","minLength":1},"aliases":{"type":"array","items":{"type":"string","minLength":1}},"canonical_url":{"type":"string","format":"uri"}}},"Authority":{"type":"object","required":["primary_sources"],"additionalProperties":false,"properties":{"primary_sources":{"type":"array","minItems":1,"items":{"type":"string","format":"uri"},"description":"Ordered list of canonical sources. Earlier sources outrank later ones."},"evidence_links":{"type":"array","items":{"type":"string","format":"uri"}},"verifications":{"type":"array","items":{"$ref":"#/$defs/Verification"}}}},"Verification":{"type":"object","required":["type","value"],"additionalProperties":false,"properties":{"type":{"type":"string","enum":["domain","dns","github","linkedin","gpg","well-known-uri"]},"value":{"type":"string","minLength":1},"proof_uri":{"type":"string","format":"uri"}}},"Claim":{"type":"object","required":["id","predicate","value"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$","description":"Lowercase kebab-case identifier unique within this document."},"predicate":{"type":"string","description":"Schema.org property name OR aeo:<name> namespaced predicate."},"value":{"description":"Asserted value. May be primitive, array, or nested object."},"evidence":{"type":"array","items":{"type":"string","format":"uri"}},"valid_from":{"type":"string","format":"date"},"valid_until":{"oneOf":[{"type":"string","format":"date"},{"type":"null"}]},"confidence":{"type":"string","enum":["high","medium","low"],"default":"high"}}},"CitationPreferences":{"type":"object","additionalProperties":false,"properties":{"preferred_attribution":{"type":"string","description":"Short attribution template. May include {name}, {canonical_url}, {role}."},"canonical_links":{"type":"array","items":{"type":"string","format":"uri"}},"do_not_cite":{"type":"array","items":{"type":"string","format":"uri"}}}},"AnswerConstraints":{"type":"object","additionalProperties":false,"properties":{"must_include":{"type":"array","items":{"type":"string"}},"must_not_include":{"type":"array","items":{"type":"string"}},"freshness_window_days":{"type":"integer","minimum":1}}},"Audit":{"type":"object","required":["mode"],"additionalProperties":false,"properties":{"mode":{"type":"string","enum":["none","signature","endpoint"]},"signing_key_uri":{"type":"string","format":"uri"},"signature":{"type":"string"},"endpoint_uri":{"type":"string","format":"uri"},"endpoint_schema":{"type":"string","format":"uri"}},"allOf":[{"if":{"properties":{"mode":{"const":"signature"}}},"then":{"required":["signing_key_uri","signature"]}},{"if":{"properties":{"mode":{"const":"endpoint"}}},"then":{"required":["endpoint_uri"]}}]}}},"provenance":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/prompt-provenance-spec/blob/main/provenance.schema.json","title":"Prompt Provenance Document","description":"Schema for a Prompt Provenance document describing one version of one prompt: identity, lineage, authorship, evaluations, and approval state.","type":"object","required":["provenance_version","prompt","lineage","authorship","approval"],"additionalProperties":false,"properties":{"provenance_version":{"type":"string","const":"0.1"},"prompt":{"$ref":"#/$defs/Prompt"},"lineage":{"$ref":"#/$defs/Lineage"},"authorship":{"$ref":"#/$defs/Authorship"},"intent":{"$ref":"#/$defs/Intent"},"evaluations":{"type":"array","items":{"$ref":"#/$defs/Evaluation"}},"approval":{"$ref":"#/$defs/Approval"},"deprecation":{"$ref":"#/$defs/Deprecation"}},"allOf":[{"if":{"properties":{"approval":{"properties":{"state":{"const":"deprecated"}}}}},"then":{"required":["deprecation"]}}],"$defs":{"Prompt":{"type":"object","required":["id","name","version","hash","content_uri","content_type"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$"},"name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"hash":{"type":"string","pattern":"^sha256:[a-f0-9]{64}$"},"content_uri":{"type":"string","format":"uri"},"content_type":{"type":"string","minLength":1}}},"Lineage":{"type":"object","additionalProperties":false,"properties":{"parent":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]@\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"derivation":{"type":"string","enum":["fork","tune","patch"]},"change_summary":{"type":"string","minLength":1}},"allOf":[{"if":{"required":["parent"]},"then":{"required":["derivation","change_summary"]}}]},"Authorship":{"type":"object","required":["created_by","created_at"],"additionalProperties":false,"properties":{"created_by":{"type":"string","minLength":1},"reviewed_by":{"type":"array","items":{"type":"string","minLength":1}},"approved_by":{"type":"string","minLength":1},"created_at":{"type":"string","format":"date-time"},"approved_at":{"type":"string","format":"date-time"}}},"Intent":{"type":"object","additionalProperties":false,"properties":{"purpose":{"type":"string","minLength":1},"in_scope":{"type":"array","items":{"type":"string"}},"out_of_scope":{"type":"array","items":{"type":"string"}},"models_supported":{"type":"array","items":{"type":"string"}}}},"Evaluation":{"type":"object","required":["suite","result_uri","passed","ran_at"],"additionalProperties":false,"properties":{"suite":{"type":"string","minLength":1},"result_uri":{"type":"string","format":"uri"},"score":{"type":"number"},"passed":{"type":"boolean"},"ran_at":{"type":"string","format":"date-time"}}},"Approval":{"type":"object","required":["state"],"additionalProperties":false,"properties":{"state":{"type":"string","enum":["draft","under_review","approved","rejected","deprecated"]},"policy_uri":{"type":"string","format":"uri"}}},"Deprecation":{"type":"object","required":["reason","deprecated_at"],"additionalProperties":false,"properties":{"reason":{"type":"string","minLength":1},"superseded_by":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]@\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"deprecated_at":{"type":"string","format":"date-time"}}}}},"agent-card":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/agent-cards-spec/blob/main/agent-card.schema.json","title":"Agent Card","description":"Schema for an Agent Card document disclosing an AI agent's capabilities, refusal behavior, evaluations, deployment, and safety posture.","type":"object","required":["agent_card_version","agent","capabilities","refusal_taxonomy","deployment","safety_posture"],"additionalProperties":false,"properties":{"agent_card_version":{"type":"string","const":"0.1"},"agent":{"$ref":"#/$defs/Agent"},"capabilities":{"$ref":"#/$defs/Capabilities"},"refusal_taxonomy":{"type":"array","items":{"$ref":"#/$defs/RefusalCategory"}},"evaluations":{"type":"array","items":{"$ref":"#/$defs/Evaluation"}},"deployment":{"$ref":"#/$defs/Deployment"},"safety_posture":{"$ref":"#/$defs/SafetyPosture"}},"allOf":[{"if":{"properties":{"capabilities":{"properties":{"autonomy_level":{"const":"autonomous"}}}}},"then":{"properties":{"safety_posture":{"required":["incident_response_uri"]}}}}],"$defs":{"Agent":{"type":"object","required":["id","name","version","provider","description"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$"},"name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"provider":{"type":"string","minLength":1},"homepage":{"type":"string","format":"uri"},"description":{"type":"string","minLength":1}}},"Capabilities":{"type":"object","required":["primary_purpose","models_used","tools","max_context_tokens","memory_persistence","autonomy_level"],"additionalProperties":false,"properties":{"primary_purpose":{"type":"string","minLength":1},"models_used":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/ModelUse"}},"tools":{"type":"array","items":{"$ref":"#/$defs/ToolUse"}},"max_context_tokens":{"type":"integer","minimum":1},"memory_persistence":{"type":"string","enum":["none","session","persistent"]},"autonomy_level":{"type":"string","enum":["assistive","supervised","autonomous"]},"prompts_used":{"type":"array","items":{"type":"string","format":"uri"}}}},"ModelUse":{"type":"object","required":["name","role"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"provider":{"type":"string","minLength":1},"role":{"type":"string","enum":["planner","executor","critic","router","judge"]}}},"ToolUse":{"type":"object","required":["name","side_effects"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"mcp_tool_card_uri":{"type":"string","format":"uri"},"side_effects":{"type":"string","enum":["read","mutating","external","destructive"]}}},"RefusalCategory":{"type":"object","required":["category","behavior"],"additionalProperties":false,"properties":{"category":{"type":"string","minLength":1},"behavior":{"type":"string","enum":["refuse_silently","refuse_and_explain","escalate_to_human","redirect_to_alternative"]},"example_prompts":{"type":"array","items":{"type":"string"}}}},"Evaluation":{"type":"object","required":["suite","result_uri","ran_at"],"additionalProperties":false,"properties":{"suite":{"type":"string","minLength":1},"result_uri":{"type":"string","format":"uri"},"metrics":{"type":"object"},"ran_at":{"type":"string","format":"date-time"}}},"Deployment":{"type":"object","required":["environment"],"additionalProperties":false,"properties":{"environment":{"type":"string","enum":["production","staging","sandbox","experimental"]},"rate_limits":{"type":"object"},"uptime_sla":{"type":"string"},"regions":{"type":"array","items":{"type":"string"}}}},"SafetyPosture":{"type":"object","required":["human_in_loop_required"],"additionalProperties":false,"properties":{"human_in_loop_required":{"type":"array","items":{"type":"string"}},"audit_log_uri":{"type":"string","format":"uri"},"incident_response_uri":{"type":"string","format":"uri"},"disclosure_uri":{"type":"string","format":"uri"}}}}},"evidence":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/ai-evidence-format-spec/blob/main/evidence.schema.json","title":"AI Evidence Object","description":"Schema for an AI Evidence object \u2014 a structured citation that travels with a claim produced by an LLM-based answer engine.","type":"object","required":["evidence_version","evidence_id","claim_text","source","span","retrieval","verification","synthesis_role"],"additionalProperties":false,"properties":{"evidence_version":{"type":"string","const":"0.1"},"evidence_id":{"type":"string","minLength":1},"claim_text":{"type":"string","minLength":1},"source":{"$ref":"#/$defs/Source"},"span":{"$ref":"#/$defs/Span"},"retrieval":{"$ref":"#/$defs/Retrieval"},"verification":{"$ref":"#/$defs/Verification"},"synthesis_role":{"type":"string","enum":["supporting","contradicting","partial","background"]},"notes":{"type":"string"}},"$defs":{"Source":{"type":"object","required":["uri","type","fetched_at"],"additionalProperties":false,"properties":{"uri":{"type":"string","format":"uri"},"type":{"type":"string","enum":["document","webpage","api_response","knowledge_graph","aeo_declaration","dataset","database_row"]},"title":{"type":"string"},"publisher":{"type":"string"},"published_at":{"type":"string","format":"date-time"},"fetched_at":{"type":"string","format":"date-time"}}},"Span":{"type":"object","required":["selector_type"],"additionalProperties":false,"properties":{"selector_type":{"type":"string","enum":["byte_range","line_range","xpath","css","text_quote","paragraph_index","none"]},"selector_value":{"type":"string"},"exact_text":{"type":"string"},"surrounding_context":{"type":"string"}},"allOf":[{"if":{"properties":{"selector_type":{"not":{"const":"none"}}}},"then":{"required":["selector_value"]}}]},"Retrieval":{"type":"object","required":["method"],"additionalProperties":false,"properties":{"method":{"type":"string","enum":["vector","keyword","graph","hybrid","direct_fetch","model_recall"]},"confidence":{"type":"number","minimum":0,"maximum":1},"rank":{"type":"integer","minimum":1},"freshness_age_seconds":{"type":"integer","minimum":0},"retriever_id":{"type":"string"}}},"Verification":{"type":"object","required":["content_hash"],"additionalProperties":false,"properties":{"content_hash":{"type":"string","pattern":"^sha256:[a-f0-9]{64}$"},"signature":{"type":"string"},"signing_key_uri":{"type":"string","format":"uri"},"signed_by":{"type":"string"}}}}},"tool-card":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/mcp-tool-card-spec/blob/main/tool-card.schema.json","title":"MCP Tool Card","description":"Schema for an MCP Tool Card document describing one tool of one MCP server: schema, safety profile, tested-LLM matrix, performance, cost, and audit surface.","type":"object","required":["tool_card_version","tool","schema","safety","audit"],"additionalProperties":false,"properties":{"tool_card_version":{"type":"string","const":"0.1"},"tool":{"$ref":"#/$defs/Tool"},"schema":{"$ref":"#/$defs/Schema"},"safety":{"$ref":"#/$defs/Safety"},"tested_with":{"type":"array","items":{"$ref":"#/$defs/TestEntry"}},"performance":{"$ref":"#/$defs/Performance"},"cost":{"$ref":"#/$defs/Cost"},"audit":{"$ref":"#/$defs/Audit"}},"allOf":[{"if":{"properties":{"safety":{"properties":{"side_effect_class":{"const":"destructive"}}}}},"then":{"properties":{"safety":{"properties":{"human_approval_required":{"const":true}}}}}}],"$defs":{"Tool":{"type":"object","required":["server_id","name","version","mcp_server_uri","description"],"additionalProperties":false,"properties":{"server_id":{"type":"string","minLength":1},"name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"mcp_server_uri":{"type":"string","format":"uri"},"description":{"type":"string","minLength":1}}},"Schema":{"type":"object","additionalProperties":false,"properties":{"input_schema_uri":{"type":"string","format":"uri"},"input_schema_inline":{"type":"object"},"output_schema_uri":{"type":"string","format":"uri"},"output_schema_inline":{"type":"object"}},"oneOf":[{"required":["input_schema_uri"]},{"required":["input_schema_inline"]}]},"Safety":{"type":"object","required":["side_effect_class","reversible","rate_limited","pii_exposure","secrets_exposure","human_approval_required"],"additionalProperties":false,"properties":{"side_effect_class":{"type":"string","enum":["read","mutating","external","destructive"]},"external_systems":{"type":"array","items":{"type":"string"}},"reversible":{"type":"boolean"},"rate_limited":{"type":"boolean"},"pii_exposure":{"type":"string","enum":["none","low","medium","high"]},"secrets_exposure":{"type":"string","enum":["none","reads_secret_material","writes_secret_material","handles_keys"]},"human_approval_required":{"type":"boolean"},"refusal_modes":{"type":"array","items":{"type":"string"}}}},"TestEntry":{"type":"object","required":["llm","test_suite_uri","pass_rate","tested_at"],"additionalProperties":false,"properties":{"llm":{"type":"string","minLength":1},"provider":{"type":"string"},"test_suite_uri":{"type":"string","format":"uri"},"pass_rate":{"type":"number","minimum":0,"maximum":1},"tested_at":{"type":"string","format":"date-time"},"sample_size":{"type":"integer","minimum":1}}},"Performance":{"type":"object","additionalProperties":false,"properties":{"p50_latency_ms":{"type":"integer","minimum":0},"p99_latency_ms":{"type":"integer","minimum":0},"measurement_window":{"type":"string"}}},"Cost":{"type":"object","additionalProperties":false,"properties":{"per_call_amount":{"type":"number","minimum":0},"per_call_currency":{"type":"string","pattern":"^[A-Z]{3}$"},"notes":{"type":"string"}}},"Audit":{"type":"object","additionalProperties":false,"properties":{"log_uri":{"type":"string","format":"uri"},"retention_days":{"type":"integer","minimum":1},"signed_by":{"type":"string"},"incident_response_uri":{"type":"string","format":"uri"}}}}},"tutor-card":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/ai-tutor-card-spec/blob/main/tutor-card.schema.json","title":"AI Tutor Card","description":"Schema for an AI Tutor Card v0.1 document \u2014 declarative disclosure of an AI tutor's audience, pedagogy, safety, and student-data privacy posture.","type":"object","required":["tutor_card_version","tutor","audience","subject_scope","pedagogy","safety","data_privacy"],"additionalProperties":false,"properties":{"tutor_card_version":{"type":"string","const":"0.1"},"tutor":{"$ref":"#/$defs/Tutor"},"audience":{"$ref":"#/$defs/Audience"},"subject_scope":{"$ref":"#/$defs/SubjectScope"},"pedagogy":{"$ref":"#/$defs/Pedagogy"},"curriculum_alignment":{"type":"array","items":{"$ref":"#/$defs/CurriculumFramework"}},"safety":{"$ref":"#/$defs/Safety"},"data_privacy":{"$ref":"#/$defs/DataPrivacy"},"agent_card_uri":{"type":"string","format":"uri"},"evaluations":{"type":"array","items":{"$ref":"#/$defs/Evaluation"}},"audit":{"$ref":"#/$defs/Audit"}},"allOf":[{"if":{"properties":{"audience":{"properties":{"age_range_min":{"type":"integer","maximum":12}}}}},"then":{"properties":{"data_privacy":{"properties":{"coppa_compliant":{"const":true}}}}}}],"$defs":{"Tutor":{"type":"object","required":["id","name","version","provider","description"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$"},"name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"provider":{"type":"string","minLength":1},"homepage":{"type":"string","format":"uri"},"description":{"type":"string","minLength":1}}},"Audience":{"type":"object","required":["age_range_min","age_range_max","grade_range_min","grade_range_max","language_codes"],"additionalProperties":false,"properties":{"age_range_min":{"type":"integer","minimum":3,"maximum":99},"age_range_max":{"type":"integer","minimum":3,"maximum":99},"grade_range_min":{"type":"string","minLength":1},"grade_range_max":{"type":"string","minLength":1},"language_codes":{"type":"array","minItems":1,"items":{"type":"string","pattern":"^[a-z]{2,3}(-[A-Z]{2})?$"}}}},"SubjectScope":{"type":"object","required":["primary_subjects"],"additionalProperties":false,"properties":{"primary_subjects":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"topics_included":{"type":"array","items":{"type":"string"}},"topics_excluded":{"type":"array","items":{"type":"string"}}}},"Pedagogy":{"type":"object","required":["approach","homework_policy","assessment_policy"],"additionalProperties":false,"properties":{"approach":{"type":"string","enum":["socratic","direct_instruction","scaffolded","personalized","mixed"]},"homework_policy":{"type":"string","enum":["complete","guide_only","refuse"]},"assessment_policy":{"type":"string","enum":["complete","guide_only","refuse"]},"supports_visual_explanations":{"type":"boolean"},"supports_step_by_step_breakdown":{"type":"boolean"},"supports_alternative_explanations":{"type":"boolean"}}},"CurriculumFramework":{"type":"object","required":["framework"],"additionalProperties":false,"properties":{"framework":{"type":"string","minLength":1},"version":{"type":"string"},"coverage_uri":{"type":"string","format":"uri"}}},"Safety":{"type":"object","required":["content_filter_strength","mandated_reporter_protocol","human_in_loop_required"],"additionalProperties":false,"properties":{"content_filter_strength":{"type":"string","enum":["strict","moderate","light"]},"mandated_reporter_protocol":{"type":"boolean"},"human_in_loop_required":{"type":"array","items":{"type":"string"}},"blocks_explicit_content":{"type":"boolean"},"blocks_drug_alcohol_content":{"type":"boolean"},"blocks_violence_content":{"type":"boolean"},"blocks_political_advocacy":{"type":"boolean"}}},"DataPrivacy":{"type":"object","required":["ferpa_compliant","coppa_compliant","gdpr_compliant","retention_days","data_sharing_with_parents","data_sharing_with_school","third_party_data_sharing"],"additionalProperties":false,"properties":{"ferpa_compliant":{"type":"boolean"},"coppa_compliant":{"type":"boolean"},"gdpr_compliant":{"type":"boolean"},"retention_days":{"type":"integer","minimum":0},"data_sharing_with_parents":{"type":"string","enum":["full_transcript","summaries_only","none"]},"data_sharing_with_school":{"type":"string","enum":["full_transcript","summaries_only","none"]},"third_party_data_sharing":{"type":"boolean"},"model_training_consent_required":{"type":"boolean"}}},"Evaluation":{"type":"object","required":["suite","result_uri","ran_at"],"additionalProperties":false,"properties":{"suite":{"type":"string","minLength":1},"result_uri":{"type":"string","format":"uri"},"metrics":{"type":"object"},"ran_at":{"type":"string","format":"date-time"}}},"Audit":{"type":"object","additionalProperties":false,"properties":{"audit_log_uri":{"type":"string","format":"uri"},"incident_response_uri":{"type":"string","format":"uri"},"disclosure_uri":{"type":"string","format":"uri"}}}}},"student-ai-disclosure":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/student-ai-disclosure-spec/blob/main/student-ai-disclosure.schema.json","title":"Student AI Disclosure","description":"Schema for a Student AI Disclosure v0.1 document \u2014 machine-readable disclosure of how AI was used in producing a student-submitted artifact.","type":"object","required":["disclosure_version","disclosure_id","created_at","student","assignment","ai_used","artifact_hash","signed_by_student","student_signature_at"],"additionalProperties":false,"properties":{"disclosure_version":{"type":"string","const":"0.1"},"disclosure_id":{"type":"string","minLength":1},"created_at":{"type":"string","format":"date-time"},"student":{"$ref":"#/$defs/Student"},"assignment":{"$ref":"#/$defs/Assignment"},"ai_used":{"type":"boolean"},"tools_used":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/ToolUsed"}},"roles":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/Role"}},"roles_other_text":{"type":"string","minLength":1},"assistance_extent":{"type":"string","enum":["minor","substantial","primary_author"]},"assistance_pct":{"type":"integer","minimum":0,"maximum":100},"prompt_evidence_mode":{"type":"string","enum":["full","hashed","omitted"]},"prompts":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/Prompt"}},"artifact_hash":{"type":"string","pattern":"^sha256:[a-f0-9]{64}$"},"artifact_uri":{"type":"string","format":"uri"},"aup_uri":{"type":"string","format":"uri"},"policy_compliant":{"$ref":"#/$defs/PolicyCompliant"},"signed_by_student":{"type":"boolean","const":true},"student_signature_at":{"type":"string","format":"date-time"},"teacher_acknowledged":{"$ref":"#/$defs/TeacherAcknowledged"}},"allOf":[{"description":"If ai_used is true, tools_used / roles / assistance_extent / prompt_evidence_mode MUST be present.","if":{"properties":{"ai_used":{"const":true}},"required":["ai_used"]},"then":{"required":["tools_used","roles","assistance_extent","prompt_evidence_mode"]}},{"description":"If ai_used is false, AI-only fields MUST NOT be present.","if":{"properties":{"ai_used":{"const":false}},"required":["ai_used"]},"then":{"not":{"anyOf":[{"required":["tools_used"]},{"required":["roles"]},{"required":["assistance_extent"]},{"required":["assistance_pct"]},{"required":["prompt_evidence_mode"]},{"required":["prompts"]}]}}},{"description":"If prompt_evidence_mode is full or hashed, prompts MUST be present.","if":{"properties":{"prompt_evidence_mode":{"enum":["full","hashed"]}},"required":["prompt_evidence_mode"]},"then":{"required":["prompts"]}},{"description":"If prompt_evidence_mode is omitted, prompts MUST NOT be present.","if":{"properties":{"prompt_evidence_mode":{"const":"omitted"}},"required":["prompt_evidence_mode"]},"then":{"not":{"required":["prompts"]}}},{"description":"If roles contains 'other', roles_other_text MUST be present.","if":{"properties":{"roles":{"type":"array","contains":{"const":"other"}}},"required":["roles"]},"then":{"required":["roles_other_text"]}}],"$defs":{"Student":{"type":"object","required":["id"],"additionalProperties":false,"properties":{"id":{"type":"string","minLength":1},"display_name":{"type":"string","minLength":1},"grade_or_year":{"type":"string","minLength":1},"institution_id":{"type":"string","minLength":1}}},"Assignment":{"type":"object","required":["id","title","course_id"],"additionalProperties":false,"properties":{"id":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"course_id":{"type":"string","minLength":1},"lms":{"type":"string","enum":["canvas","schoology","google-classroom","moodle","d2l-brightspace","blackboard","other"]},"due_at":{"type":"string","format":"date-time"}}},"ToolUsed":{"type":"object","required":["name"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"provider":{"type":"string","minLength":1},"version":{"type":"string","minLength":1},"agent_card_uri":{"type":"string","format":"uri"},"tutor_card_uri":{"type":"string","format":"uri"}}},"Role":{"type":"string","enum":["brainstorm","outline","draft","edit","translate","cite_check","code_completion","code_review","research_synthesis","tutor_dialog","image_generation","data_analysis","other"]},"Prompt":{"type":"object","required":["id"],"additionalProperties":false,"properties":{"id":{"type":"string","minLength":1},"text":{"type":"string","minLength":1},"hash":{"type":"string","pattern":"^sha256:[a-f0-9]{64}$"},"at":{"type":"string","format":"date-time"},"tool_index":{"type":"integer","minimum":0}},"oneOf":[{"required":["text"],"not":{"required":["hash"]}},{"required":["hash"],"not":{"required":["text"]}}]},"PolicyCompliant":{"type":"object","required":["declared"],"additionalProperties":false,"properties":{"declared":{"type":"boolean"},"reason":{"type":"string","minLength":1}}},"TeacherAcknowledged":{"type":"object","required":["acknowledged","by","at"],"additionalProperties":false,"properties":{"acknowledged":{"type":"boolean"},"by":{"type":"string","minLength":1},"at":{"type":"string","format":"date-time"},"note":{"type":"string","minLength":1}}}}},"aup":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/classroom-ai-aup-spec/blob/main/aup.schema.json","title":"Classroom AI Acceptable Use Policy","description":"Schema for a Classroom AI AUP v0.1 document \u2014 machine-readable declaration of permitted AI use, disclosure requirements, supervision, and vendor requirements at a district, school, course, or assignment scope.","type":"object","required":["aup_version","policy_id","policy_name","version","effective_at","scope","permitted_use","disclosure_requirements","published_by","published_at"],"additionalProperties":false,"properties":{"aup_version":{"type":"string","const":"0.1"},"policy_id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$"},"policy_name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"effective_at":{"type":"string","format":"date-time"},"expires_at":{"type":"string","format":"date-time"},"replaces":{"type":"string","format":"uri"},"scope":{"$ref":"#/$defs/Scope"},"permitted_use":{"$ref":"#/$defs/PermittedUse"},"prohibited_use":{"$ref":"#/$defs/ProhibitedUse"},"disclosure_requirements":{"$ref":"#/$defs/DisclosureRequirements"},"supervision":{"$ref":"#/$defs/Supervision"},"vendor_requirements":{"$ref":"#/$defs/VendorRequirements"},"parent_notification":{"$ref":"#/$defs/ParentNotification"},"enforcement":{"$ref":"#/$defs/Enforcement"},"published_by":{"$ref":"#/$defs/PublishedBy"},"published_at":{"type":"string","format":"date-time"},"audit_log_uri":{"type":"string","format":"uri"}},"allOf":[{"description":"Scope completeness: type=course requires course_ids.","if":{"properties":{"scope":{"properties":{"type":{"const":"course"}}}},"required":["scope"]},"then":{"properties":{"scope":{"required":["course_ids"],"properties":{"course_ids":{"minItems":1}}}}}},{"description":"Scope completeness: type=assignment requires assignment_ids.","if":{"properties":{"scope":{"properties":{"type":{"const":"assignment"}}}},"required":["scope"]},"then":{"properties":{"scope":{"required":["assignment_ids"],"properties":{"assignment_ids":{"minItems":1}}}}}},{"description":"Extent-vs-roles: assistance_extent_max=none requires permitted_roles to be empty.","if":{"properties":{"permitted_use":{"properties":{"assistance_extent_max":{"const":"none"}}}},"required":["permitted_use"]},"then":{"properties":{"permitted_use":{"properties":{"permitted_roles":{"maxItems":0}}}}}}],"$defs":{"Role":{"type":"string","enum":["brainstorm","outline","draft","edit","translate","cite_check","code_completion","code_review","research_synthesis","tutor_dialog","image_generation","data_analysis","other"]},"Scope":{"type":"object","required":["type","institution_id"],"additionalProperties":false,"properties":{"type":{"type":"string","enum":["district","school","course","assignment"]},"institution_id":{"type":"string","minLength":1},"grade_bands":{"type":"array","items":{"type":"string","enum":["K-5","6-8","9-12","undergrad","grad","adult-ed"]},"uniqueItems":true},"course_ids":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"assignment_ids":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"parent_policy_uri":{"type":"string","format":"uri"}}},"PermittedUse":{"type":"object","required":["permitted_roles","assistance_extent_max"],"additionalProperties":false,"properties":{"permitted_roles":{"type":"array","items":{"$ref":"#/$defs/Role"},"uniqueItems":true},"permitted_tool_categories":{"type":"array","items":{"type":"string","enum":["text_chat","tutoring","code_assistant","image_generation","translation","research_synthesis","data_analysis","general"]},"uniqueItems":true},"permitted_tools":{"type":"array","items":{"type":"object","required":["name"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"agent_card_uri":{"type":"string","format":"uri"},"tutor_card_uri":{"type":"string","format":"uri"},"notes":{"type":"string","minLength":1}}}},"assistance_extent_max":{"type":"string","enum":["none","minor","substantial","primary_author"]}}},"ProhibitedUse":{"type":"object","additionalProperties":false,"properties":{"prohibited_roles":{"type":"array","items":{"$ref":"#/$defs/Role"},"uniqueItems":true},"prohibited_uses":{"type":"array","items":{"type":"string","minLength":1}}}},"DisclosureRequirements":{"type":"object","required":["required_when","signature_required"],"additionalProperties":false,"properties":{"required_when":{"type":"string","enum":["always","when_used","never"]},"required_prompt_evidence_mode":{"type":"string","enum":["full","hashed","omitted","any"]},"signature_required":{"type":"boolean"},"teacher_acknowledgment_required":{"type":"boolean"},"artifact_hash_required":{"type":"boolean"}}},"Supervision":{"type":"object","required":["level"],"additionalProperties":false,"properties":{"level":{"type":"string","enum":["unsupervised","teacher_visible","teacher_approved","proctored"]},"human_in_loop_categories":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}}},"VendorRequirements":{"type":"object","additionalProperties":false,"properties":{"requires_tutor_card":{"type":"boolean"},"requires_agent_card":{"type":"boolean"},"required_compliance":{"type":"array","items":{"type":"string","enum":["ferpa","coppa","gdpr","state-specific"]},"uniqueItems":true},"state_specific_laws":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"required_content_filter_strength_min":{"type":"string","enum":["strict","moderate","light"]},"requires_mandated_reporter_protocol":{"type":"boolean"},"requires_human_in_loop_for":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"retention_days_max":{"type":"integer","minimum":0},"prohibits_third_party_data_sharing":{"type":"boolean"},"prohibits_model_training_on_student_data":{"type":"boolean"}}},"ParentNotification":{"type":"object","required":["notification_level","parent_consent_required"],"additionalProperties":false,"properties":{"notification_level":{"type":"string","enum":["none","at_enrollment","per_assignment","per_use"]},"parent_consent_required":{"type":"boolean"},"consent_age_threshold":{"type":"integer","minimum":0,"maximum":25}}},"Enforcement":{"type":"object","additionalProperties":false,"properties":{"violation_response":{"type":"array","items":{"type":"string","minLength":1}},"appeals_process_uri":{"type":"string","format":"uri"}}},"PublishedBy":{"type":"object","required":["name"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"role":{"type":"string","minLength":1},"contact_uri":{"type":"string","format":"uri"}}}}},"clinical-ai-card":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/clinical-ai-disclosure-spec/blob/main/clinical-ai-card.schema.json","title":"Clinical AI Card","description":"Schema for a Clinical AI Card v0.1 document \u2014 declarative disclosure of an AI system used in healthcare. Captures clinical context, FDA / SaMD status, evidence, HIPAA posture, EHR integration, and safety posture.","type":"object","required":["clinical_ai_card_version","system","clinical_context","regulatory","clinical_role","evidence","patient_data","safety"],"additionalProperties":false,"properties":{"clinical_ai_card_version":{"type":"string","const":"0.1"},"system":{"$ref":"#/$defs/System"},"clinical_context":{"$ref":"#/$defs/ClinicalContext"},"regulatory":{"$ref":"#/$defs/Regulatory"},"clinical_role":{"$ref":"#/$defs/ClinicalRole"},"evidence":{"$ref":"#/$defs/Evidence"},"patient_data":{"$ref":"#/$defs/PatientData"},"safety":{"$ref":"#/$defs/Safety"},"ehr_integration":{"$ref":"#/$defs/EhrIntegration"},"agent_card_uri":{"type":"string","format":"uri"},"evaluations":{"type":"array","items":{"$ref":"#/$defs/Evaluation"}},"audit":{"$ref":"#/$defs/Audit"}},"allOf":[{"description":"Autonomy in clinical roles requires medical-device classification.","if":{"properties":{"clinical_role":{"properties":{"decision_support_level":{"const":"autonomous"}}}},"required":["clinical_role"]},"then":{"properties":{"regulatory":{"properties":{"is_medical_device":{"const":true}}}}}},{"description":"SaMD requires class + classification rationale.","if":{"properties":{"regulatory":{"properties":{"is_software_as_medical_device":{"const":true}}}},"required":["regulatory"]},"then":{"properties":{"regulatory":{"required":["samd_class","samd_classification_rationale"]}}}},{"description":"FDA clearance values require clearance number and URI.","if":{"properties":{"regulatory":{"properties":{"fda_status":{"enum":["510k_cleared","de_novo","pma"]}}}},"required":["regulatory"]},"then":{"properties":{"regulatory":{"required":["fda_clearance_number","fda_clearance_uri"]}}}},{"description":"PHI processing requires explicit HIPAA + BAA posture.","if":{"properties":{"patient_data":{"properties":{"phi_processed":{"const":true}}}},"required":["patient_data"]},"then":{"properties":{"patient_data":{"required":["hipaa_compliant","baa_required"]}}}},{"description":"SaMD class II+ requires bias audit URI.","if":{"properties":{"regulatory":{"type":"object","required":["samd_class"],"properties":{"samd_class":{"enum":["II","III","IV"]}}}},"required":["regulatory"]},"then":{"properties":{"evidence":{"required":["bias_audit_uri"]}}}},{"description":"Autonomous decision support requires bias audit URI.","if":{"properties":{"clinical_role":{"type":"object","required":["decision_support_level"],"properties":{"decision_support_level":{"const":"autonomous"}}}},"required":["clinical_role"]},"then":{"properties":{"evidence":{"required":["bias_audit_uri"]}}}},{"description":"Pre-authorization use requires bias audit URI.","if":{"properties":{"clinical_role":{"type":"object","required":["pre_authorization_use"],"properties":{"pre_authorization_use":{"const":true}}}},"required":["clinical_role"]},"then":{"properties":{"evidence":{"required":["bias_audit_uri"]}}}}],"$defs":{"System":{"type":"object","required":["id","name","version","provider","description"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[a-z0-9][a-z0-9-]*[a-z0-9]$"},"name":{"type":"string","minLength":1},"version":{"type":"string","pattern":"^\\d+\\.\\d+\\.\\d+(?:[-+].+)?$"},"provider":{"type":"string","minLength":1},"homepage":{"type":"string","format":"uri"},"description":{"type":"string","minLength":1}}},"ClinicalContext":{"type":"object","required":["indication","care_settings","patient_population","intended_use","off_label_uses_prohibited"],"additionalProperties":false,"properties":{"indication":{"type":"string","minLength":1},"care_settings":{"type":"array","minItems":1,"items":{"type":"string","enum":["inpatient","outpatient","icu","ed","home","telehealth","research","pharmacy","radiology","pathology"]},"uniqueItems":true},"patient_population":{"type":"object","required":["age_range_min","age_range_max"],"additionalProperties":false,"properties":{"age_range_min":{"type":"integer","minimum":0},"age_range_max":{"type":"integer","maximum":130},"exclusions":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}}},"intended_use":{"type":"string","minLength":1},"off_label_uses_prohibited":{"type":"boolean"}}},"Regulatory":{"type":"object","required":["fda_status","is_medical_device","is_clinical_decision_support","is_software_as_medical_device"],"additionalProperties":false,"properties":{"fda_status":{"type":"string","enum":["510k_cleared","de_novo","pma","enforcement_discretion","research_use_only","not_applicable"]},"fda_clearance_number":{"type":"string","pattern":"^[A-Z]\\d{6}$|^DEN\\d{6}$|^P\\d{6}$"},"fda_clearance_uri":{"type":"string","format":"uri"},"iso_certifications":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"is_medical_device":{"type":"boolean"},"is_clinical_decision_support":{"type":"boolean"},"is_software_as_medical_device":{"type":"boolean"},"samd_class":{"type":"string","enum":["I","II","III","IV"]},"samd_classification_rationale":{"type":"string","minLength":1},"regional_authorizations":{"type":"array","items":{"type":"object","required":["region","status"],"additionalProperties":false,"properties":{"region":{"type":"string","minLength":1},"status":{"type":"string","minLength":1},"identifier":{"type":"string","minLength":1},"uri":{"type":"string","format":"uri"}}}},"notes":{"type":"string","minLength":1}}},"ClinicalRole":{"type":"object","required":["decision_support_level","clinician_override_required","patient_facing_only","transparency_to_patient_required"],"additionalProperties":false,"properties":{"decision_support_level":{"type":"string","enum":["informational","advisory","autonomous"]},"clinician_override_required":{"type":"boolean"},"patient_facing_only":{"type":"boolean"},"transparency_to_patient_required":{"type":"boolean"},"pre_authorization_use":{"type":"boolean"}}},"PerformanceMetrics":{"type":"object","required":["measurement_population"],"additionalProperties":false,"properties":{"measurement_population":{"type":"string","minLength":1},"sensitivity":{"type":"number","minimum":0,"maximum":1},"specificity":{"type":"number","minimum":0,"maximum":1},"auc":{"type":"number","minimum":0,"maximum":1},"accuracy":{"type":"number","minimum":0,"maximum":1},"false_positive_rate":{"type":"number","minimum":0,"maximum":1},"false_negative_rate":{"type":"number","minimum":0,"maximum":1},"precision":{"type":"number","minimum":0,"maximum":1},"recall":{"type":"number","minimum":0,"maximum":1},"f1":{"type":"number","minimum":0,"maximum":1},"ppv":{"type":"number","minimum":0,"maximum":1},"npv":{"type":"number","minimum":0,"maximum":1}}},"Evidence":{"type":"object","required":["validation_studies","training_data_sources","performance_metrics"],"additionalProperties":false,"properties":{"validation_studies":{"type":"array","minItems":1,"items":{"type":"object","required":["title","uri","population_size","primary_outcome","results_summary","peer_reviewed"],"additionalProperties":false,"properties":{"title":{"type":"string","minLength":1},"uri":{"type":"string","format":"uri"},"population_size":{"type":"integer","minimum":1},"primary_outcome":{"type":"string","minLength":1},"results_summary":{"type":"string","minLength":1},"peer_reviewed":{"type":"boolean"},"published_at":{"type":"string","format":"date-time"}}}},"training_data_sources":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"bias_audit_uri":{"type":"string","format":"uri"},"performance_metrics":{"$ref":"#/$defs/PerformanceMetrics"}}},"PatientData":{"type":"object","required":["phi_processed","retention_days","patient_consent_required","third_party_data_sharing"],"additionalProperties":false,"properties":{"phi_processed":{"type":"boolean"},"hipaa_compliant":{"type":"boolean"},"baa_required":{"type":"boolean"},"de_identification_method":{"type":"string","enum":["safe-harbor","expert-determination","none","not-applicable"]},"retention_days":{"type":"integer","minimum":0},"patient_consent_required":{"type":"boolean"},"consent_flow_uri":{"type":"string","format":"uri"},"third_party_data_sharing":{"type":"boolean"},"model_training_consent_required":{"type":"boolean"}}},"Safety":{"type":"object","required":["human_in_loop_required_for","mandatory_reporting_categories"],"additionalProperties":false,"properties":{"human_in_loop_required_for":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"escalation_protocols":{"type":"array","items":{"type":"string","minLength":1}},"mandatory_reporting_categories":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"blocks_diagnostic_claims":{"type":"boolean"},"treatment_recommendation_disclaimer_required":{"type":"boolean"}}},"EhrIntegration":{"type":"object","additionalProperties":false,"properties":{"fhir_version":{"type":"string","enum":["R4","R5","STU3","DSTU2"]},"supports_smart_on_fhir":{"type":"boolean"},"supports_cds_hooks":{"type":"boolean"},"ehr_vendors_supported":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}}},"Evaluation":{"type":"object","required":["suite","result_uri","ran_at"],"additionalProperties":false,"properties":{"suite":{"type":"string","minLength":1},"result_uri":{"type":"string","format":"uri"},"metrics":{"type":"object"},"ran_at":{"type":"string","format":"date-time"},"accreditation_body":{"type":"string","minLength":1}}},"Audit":{"type":"object","additionalProperties":false,"properties":{"audit_log_uri":{"type":"string","format":"uri"},"incident_response_uri":{"type":"string","format":"uri"},"incident_card_index_uri":{"type":"string","format":"uri"},"disclosure_uri":{"type":"string","format":"uri"}}}}},"incident-card":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://github.com/mizcausevic-dev/ai-incident-card-spec/blob/main/incident-card.schema.json","title":"AI Incident Card","description":"Schema for an AI Incident Card v0.1 document \u2014 vendor-published machine-readable post-incident disclosure for AI agents, tutors, tools, and models. The CVE-equivalent for AI failures.","type":"object","required":["incident_card_version","incident","affected","summary","root_cause","harm","mitigation","published_by","published_at","last_updated_at"],"additionalProperties":false,"properties":{"incident_card_version":{"type":"string","const":"0.1"},"incident":{"$ref":"#/$defs/Incident"},"categories_other_text":{"type":"string","minLength":1},"affected":{"$ref":"#/$defs/Affected"},"summary":{"type":"string","minLength":1},"root_cause":{"$ref":"#/$defs/RootCause"},"harm":{"$ref":"#/$defs/Harm"},"mitigation":{"$ref":"#/$defs/Mitigation"},"evidence":{"$ref":"#/$defs/Evidence"},"references":{"type":"array","items":{"$ref":"#/$defs/Reference"}},"regulatory":{"$ref":"#/$defs/Regulatory"},"withdrawal":{"$ref":"#/$defs/Withdrawal"},"published_by":{"$ref":"#/$defs/PublishedBy"},"published_at":{"type":"string","format":"date-time"},"last_updated_at":{"type":"string","format":"date-time"},"revision":{"$ref":"#/$defs/Revision"}},"allOf":[{"description":"Resolved status requires resolved_at","if":{"properties":{"incident":{"properties":{"status":{"const":"resolved"}}}},"required":["incident"]},"then":{"properties":{"incident":{"required":["resolved_at"]}}}},{"description":"Withdrawn status requires withdrawal block","if":{"properties":{"incident":{"properties":{"status":{"const":"withdrawn"}}}},"required":["incident"]},"then":{"required":["withdrawal"]}},{"description":"Regulatory filings require URIs","if":{"properties":{"regulatory":{"type":"object","properties":{"reported_to":{"type":"array","minItems":1}},"required":["reported_to"]}},"required":["regulatory"]},"then":{"properties":{"regulatory":{"required":["regulatory_filing_uris"],"properties":{"regulatory_filing_uris":{"minItems":1}}}}}},{"description":"root_cause.category=other requires category_other_text","if":{"properties":{"root_cause":{"properties":{"category":{"const":"other"}}}},"required":["root_cause"]},"then":{"properties":{"root_cause":{"required":["category_other_text"]}}}},{"description":"incident.categories containing 'other' requires top-level categories_other_text","if":{"properties":{"incident":{"properties":{"categories":{"type":"array","contains":{"const":"other"}}}}},"required":["incident"]},"then":{"required":["categories_other_text"]}}],"$defs":{"Severity":{"type":"string","enum":["low","medium","high","critical"]},"Status":{"type":"string","enum":["active","mitigated","resolved","withdrawn"]},"HarmCategory":{"type":"string","enum":["misinformation","pii_leak","bias","copyright_violation","mandated_reporter_failure","prompt_injection_success","tool_abuse","jailbreak_success","hallucination_with_consequences","refusal_taxonomy_violation","content_filter_failure","availability_outage","tampering","other"]},"Incident":{"type":"object","required":["id","title","severity","categories","discovered_at","disclosed_at","status"],"additionalProperties":false,"properties":{"id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9]$"},"title":{"type":"string","minLength":1},"severity":{"$ref":"#/$defs/Severity"},"categories":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/HarmCategory"},"uniqueItems":true},"discovered_at":{"type":"string","format":"date-time"},"occurred_at":{"type":"string","format":"date-time"},"disclosed_at":{"type":"string","format":"date-time"},"resolved_at":{"type":"string","format":"date-time"},"status":{"$ref":"#/$defs/Status"}}},"Affected":{"type":"object","required":["vendor","products"],"additionalProperties":false,"properties":{"vendor":{"type":"string","minLength":1},"products":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"versions":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true},"agent_card_uris":{"type":"array","items":{"type":"string","format":"uri"},"uniqueItems":true},"tutor_card_uris":{"type":"array","items":{"type":"string","format":"uri"},"uniqueItems":true},"tool_card_uris":{"type":"array","items":{"type":"string","format":"uri"},"uniqueItems":true},"affected_user_count":{"type":"object","required":["kind"],"additionalProperties":false,"properties":{"kind":{"type":"string","enum":["exact","approximate","unknown"]},"count":{"type":"integer","minimum":0}}},"affected_populations":{"type":"array","items":{"type":"string","minLength":1},"uniqueItems":true}}},"RootCause":{"type":"object","required":["category","description"],"additionalProperties":false,"properties":{"category":{"type":"string","enum":["training_data","prompt_injection","tool_abuse","refusal_taxonomy_gap","content_filter_gap","retrieval_failure","evaluation_gap","deployment_misconfiguration","supply_chain","other"]},"description":{"type":"string","minLength":1},"category_other_text":{"type":"string","minLength":1}}},"Harm":{"type":"object","required":["severity_justification","manifested"],"additionalProperties":false,"properties":{"severity_justification":{"type":"string","minLength":1},"manifested":{"type":"boolean"},"narrative":{"type":"string","minLength":1}}},"Mitigation":{"type":"object","required":["actions_taken","permanent_fix","rollout_status"],"additionalProperties":false,"properties":{"actions_taken":{"type":"array","minItems":1,"items":{"type":"string","minLength":1}},"permanent_fix":{"type":"boolean"},"rollout_status":{"type":"string","enum":["planned","in_progress","deployed"]},"workaround_for_users":{"type":"string","minLength":1}}},"Evidence":{"type":"object","additionalProperties":false,"properties":{"evidence_uris":{"type":"array","items":{"type":"string","format":"uri"}},"prompt_provenance_uri":{"type":"string","format":"uri"},"reproduction_uri":{"type":"string","format":"uri"},"internal_postmortem_uri":{"type":"string","format":"uri"}}},"Reference":{"type":"object","required":["type","title","uri"],"additionalProperties":false,"properties":{"type":{"type":"string","enum":["blog_post","regulatory_filing","academic_paper","press_release","customer_notice","other"]},"title":{"type":"string","minLength":1},"uri":{"type":"string","format":"uri"},"published_at":{"type":"string","format":"date-time"}}},"Regulatory":{"type":"object","additionalProperties":false,"properties":{"reported_to":{"type":"array","items":{"type":"string","enum":["eu-ai-act-art-73","us-omb-m-24-10","ferpa","coppa","hipaa","gdpr","state-attorney-general","fda-21-cfr-11","other"]},"uniqueItems":true},"reporting_deadline_met":{"type":"boolean"},"regulatory_filing_uris":{"type":"array","items":{"type":"string","format":"uri"},"uniqueItems":true},"not_reportable_justification":{"type":"string","minLength":1}}},"Withdrawal":{"type":"object","required":["withdrawn_at","reason"],"additionalProperties":false,"properties":{"withdrawn_at":{"type":"string","format":"date-time"},"reason":{"type":"string","minLength":1},"replacement_incident_uri":{"type":"string","format":"uri"}}},"PublishedBy":{"type":"object","required":["name","role"],"additionalProperties":false,"properties":{"name":{"type":"string","minLength":1},"role":{"type":"string","enum":["vendor","third-party-researcher","user","regulator","auditor"]},"contact_uri":{"type":"string","format":"uri"},"pgp_fingerprint":{"type":"string","minLength":1}}},"Revision":{"type":"object","required":["number","change_summary"],"additionalProperties":false,"properties":{"number":{"type":"integer","minimum":1},"change_summary":{"type":"string","minLength":1}}}}}}</script>
+  <script type="application/json" id="examples-blob">{"aeo":{"label":"AEO Protocol","doc":{"aeo_version":"0.1","entity":{"id":"https://kineticgain.com/#organization","type":"Organization","name":"Kinetic Gain","aliases":["KineticGain"],"canonical_url":"https://kineticgain.com/"},"authority":{"primary_sources":["https://kineticgain.com/","https://github.com/mizcausevic-dev"],"verifications":[{"type":"domain","value":"kineticgain.com"},{"type":"dns","value":"kineticgain.com","proof_uri":"https://kineticgain.com/.well-known/aeo-dns-proof.txt"}]},"claims":[{"id":"category","predicate":"industry","value":"AI Platform Engineering \u00b7 Enterprise Governance Tooling","confidence":"high"},{"id":"products","predicate":"aeo:operates","value":[{"name":"GitVisualizer","url":"https://gv.kineticgain.com","category":"Engineering Intelligence"},{"name":"MCP Sentinel","url":"https://mcp.kineticgain.com","category":"AI Governance"},{"name":"RAG Sentinel","url":"https://rag.kineticgain.com","category":"RAG Quality Monitoring"},{"name":"AgentObserve","url":"https://observe.kineticgain.com","category":"Agent Operations"}],"confidence":"high"},{"id":"buyer-personas","predicate":"aeo:targetEcosystem","value":["CISO","Platform Security","ML / AI Ops","SRE","Engineering Leadership"],"confidence":"high"},{"id":"deployment-model","predicate":"aeo:operates","value":"Push-to-deploy via GitHub Actions FTP CI/CD, AGPL-3.0 licensed across all four products","confidence":"high"}],"citation_preferences":{"preferred_attribution":"Kinetic Gain \u2014 kineticgain.com","canonical_links":["https://kineticgain.com/"],"do_not_cite":[]},"answer_constraints":{"freshness_window_days":30},"audit":{"mode":"signature","signing_key_uri":"https://kineticgain.com/.well-known/aeo-signing-key.json","signature":"eyJhbGciOiJFZERTQSJ9..PLACEHOLDER_DETACHED_JWS_OVER_CANONICAL_JSON"}}},"provenance":{"label":"Prompt Provenance","doc":{"provenance_version":"0.1","prompt":{"id":"incident-summary-generator","name":"Incident Summary Generator","version":"1.0.0","hash":"sha256:a3b1f9e2c6d4e8a0f7b5c2d9e1a4f6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f0","content_uri":"https://github.com/example-org/llm-prompts/blob/main/prompts/incident-summary-generator/v1.0.0/template.j2","content_type":"text/jinja2"},"lineage":{},"authorship":{"created_by":"mirzacausevic@example.com","reviewed_by":["sre-lead@example.com"],"approved_by":"sre-lead@example.com","created_at":"2026-05-12T01:00:00Z","approved_at":"2026-05-12T01:30:00Z"},"intent":{"purpose":"Summarize an incident timeline into a 200-word post-mortem opening section.","in_scope":["production incidents","SEV-1 through SEV-3","synthesized timeline narrative"],"out_of_scope":["root-cause analysis","remediation recommendations","blame attribution"],"models_supported":["claude-opus-4-*","claude-sonnet-4-*","gpt-4-*"]},"approval":{"state":"deprecated","policy_uri":"https://policy.example.com/prompts/approval-v2"},"deprecation":{"reason":"Superseded by v1.1.0 which adds explicit scope discipline; v1.0.0 produced occasional speculative cause statements.","superseded_by":"incident-summary-generator@1.1.0","deprecated_at":"2026-05-12T02:45:00Z"}}},"agent-card":{"label":"Agent Card","doc":{"agent_card_version":"0.1","agent":{"id":"customer-support-tier-1","name":"Tier-1 Customer Support Agent","version":"2.4.1","provider":"Kinetic Gain","homepage":"https://kineticgain.com/agents/support-t1","description":"First-line customer support agent. Handles account questions, billing lookups, and product orientation. Escalates anything requiring entitlement changes or financial impact to a human."},"capabilities":{"primary_purpose":"Resolve common customer questions and triage incoming support tickets.","models_used":[{"name":"claude-sonnet-4-6","provider":"Anthropic","role":"executor"},{"name":"claude-haiku-4-5","provider":"Anthropic","role":"router"}],"tools":[{"name":"billing-lookup","side_effects":"read","mcp_tool_card_uri":"https://kineticgain.com/.well-known/mcp-tools/billing/lookup.json"},{"name":"account-status-read","side_effects":"read"},{"name":"ticket-create","side_effects":"mutating"},{"name":"kb-search","side_effects":"read"}],"max_context_tokens":100000,"memory_persistence":"session","autonomy_level":"supervised","prompts_used":["https://kineticgain.com/prompts/support-t1/v2.4.1/provenance.json"]},"refusal_taxonomy":[{"category":"entitlement_change","behavior":"escalate_to_human","example_prompts":["Please upgrade my plan","Cancel my subscription"]},{"category":"refund_request","behavior":"escalate_to_human"},{"category":"legal_advice","behavior":"refuse_and_explain"},{"category":"personal_data_extraction","behavior":"refuse_silently"}],"evaluations":[{"suite":"support-t1-quality-v5","result_uri":"https://eval.kineticgain.com/runs/support-t1-2.4.1","metrics":{"csat_predicted":4.4,"first_contact_resolution":0.71},"ran_at":"2026-05-08T14:00:00Z"},{"suite":"pii-guardrail-v3","result_uri":"https://eval.kineticgain.com/runs/pii-support-t1-2.4.1","metrics":{"pii_leak_rate":0.0},"ran_at":"2026-05-08T15:00:00Z"}],"deployment":{"environment":"production","rate_limits":{"requests_per_minute_per_customer":30},"uptime_sla":"99.5%","regions":["us-east-1","eu-west-1"]},"safety_posture":{"human_in_loop_required":["entitlement_change","refund_request","account_deletion"],"audit_log_uri":"https://kineticgain.com/audit/agents/customer-support-tier-1","incident_response_uri":"https://kineticgain.com/agents/incident-report","disclosure_uri":"https://kineticgain.com/agents/customer-support-tier-1/changelog"}}},"evidence":{"label":"AI Evidence Format","doc":{"evidence_version":"0.1","evidence_id":"ev-2026-05-12-c5a8f3","claim_text":"Miz Causevic authored the AEO Protocol.","source":{"uri":"https://mizcausevic-dev.github.io/.well-known/aeo.json","type":"aeo_declaration","title":"AEO declaration for Miz Causevic","publisher":"mizcausevic-dev","fetched_at":"2026-05-12T03:47:00Z"},"span":{"selector_type":"text_quote","selector_value":"authored-spec","exact_text":"{\"id\":\"authored-spec\",\"predicate\":\"aeo:authoredSpecification\",\"value\":\"AEO Protocol v0.1\",\"evidence\":[\"https://github.com/mizcausevic-dev/aeo-protocol-spec\"],\"valid_from\":\"2026-05-12\",\"confidence\":\"high\"}","surrounding_context":"The 'authored-spec' claim in the AEO declaration document at the entity's well-known URL."},"retrieval":{"method":"direct_fetch","freshness_age_seconds":30,"retriever_id":"kinetic-rag-v3"},"verification":{"content_hash":"sha256:e9f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3"},"synthesis_role":"supporting","notes":"AEO-declared self-attestation. Entity-grounded via the well-known URI."}},"tool-card":{"label":"MCP Tool Card","doc":{"tool_card_version":"0.1","tool":{"server_id":"kg-admin-mcp","name":"tenant-reset","version":"0.3.0","mcp_server_uri":"https://admin.kineticgain.com/mcp","description":"Resets a tenant to its initial-onboarding state. Drops user data, revokes all keys, archives historical records. Irreversible after 72 hours."},"schema":{"input_schema_inline":{"type":"object","required":["tenant_id","reason","approver_ticket"],"additionalProperties":false,"properties":{"tenant_id":{"type":"string","pattern":"^tnt_[A-Za-z0-9]+$"},"reason":{"type":"string","minLength":10},"approver_ticket":{"type":"string","pattern":"^OPS-\\d+$"}}}},"safety":{"side_effect_class":"destructive","external_systems":["primary-postgres","object-storage","kms"],"reversible":false,"rate_limited":true,"pii_exposure":"high","secrets_exposure":"writes_secret_material","human_approval_required":true,"refusal_modes":["no_approver_ticket","approver_ticket_unverified","tenant_has_active_incident","within_24h_of_billing_event"]},"tested_with":[{"llm":"claude-opus-4-7","provider":"Anthropic","test_suite_uri":"https://eval.kineticgain.com/suites/mcp-admin-destructive-v1","pass_rate":1.0,"tested_at":"2026-05-10T16:00:00Z","sample_size":50}],"performance":{"p50_latency_ms":4200,"p99_latency_ms":28000,"measurement_window":"last_30d"},"audit":{"log_uri":"https://audit.kineticgain.com/mcp/tenant-reset","retention_days":2555,"signed_by":"kg-admin-mcp","incident_response_uri":"https://kineticgain.com/security/report"}}},"tutor-card":{"label":"AI Tutor Card","doc":{"tutor_card_version":"0.1","tutor":{"id":"kineticgain-college-cs-assistant","name":"Kinetic Gain College CS Assistant","version":"2.1.0","provider":"Kinetic Gain Edu","homepage":"https://edu.kineticgain.com/college-cs","description":"Computer science teaching assistant for undergraduate courses. Explains concepts, debugs student code, refuses to write submitted assignments. Optimized for CS1/CS2/Algorithms/Systems courses."},"audience":{"age_range_min":17,"age_range_max":99,"grade_range_min":"undergrad","grade_range_max":"grad","language_codes":["en"]},"subject_scope":{"primary_subjects":["Computer Science"],"topics_included":["introductory programming (Python, Java, C++)","data structures","algorithms","computer systems","operating systems","computer networks","databases","software engineering practices","version control"],"topics_excluded":["graduate research thesis writing","production code review for paid work","answers to currently-active take-home exams"]},"pedagogy":{"approach":"mixed","homework_policy":"guide_only","assessment_policy":"refuse","supports_visual_explanations":true,"supports_step_by_step_breakdown":true,"supports_alternative_explanations":true},"curriculum_alignment":[{"framework":"ACM/IEEE Computing Curricula 2020 (CC2020)","version":"2020"},{"framework":"ABET Computer Science Program Criteria","version":"2024-25"}],"safety":{"content_filter_strength":"light","mandated_reporter_protocol":false,"human_in_loop_required":["academic_integrity_concern","mental_health_crisis"],"blocks_explicit_content":true,"blocks_drug_alcohol_content":false,"blocks_violence_content":false,"blocks_political_advocacy":true},"data_privacy":{"ferpa_compliant":true,"coppa_compliant":false,"gdpr_compliant":true,"retention_days":365,"data_sharing_with_parents":"none","data_sharing_with_school":"full_transcript","third_party_data_sharing":false,"model_training_consent_required":true},"agent_card_uri":"https://edu.kineticgain.com/.well-known/agents/college-cs-assistant.json","evaluations":[{"suite":"cs-debug-accuracy-v4","result_uri":"https://eval.kineticgain.com/runs/college-cs-2.1.0","metrics":{"bug_localization_accuracy":0.88,"assignment_completion_refusal_rate":0.97},"ran_at":"2026-05-05T00:00:00Z"},{"suite":"academic-integrity-stress-v1","result_uri":"https://eval.kineticgain.com/runs/integrity-college-cs-2.1.0","metrics":{"complete_assignment_attempts_blocked":0.97},"ran_at":"2026-05-06T00:00:00Z"}],"audit":{"audit_log_uri":"https://edu.kineticgain.com/admin/college-cs-assistant/audit","incident_response_uri":"https://edu.kineticgain.com/report-safety-concern","disclosure_uri":"https://edu.kineticgain.com/college-cs-assistant/changelog"}}},"student-ai-disclosure":{"label":"Student AI Disclosure","doc":{"disclosure_version":"0.1","disclosure_id":"d-2026-05-12-b4f9c1e8","created_at":"2026-05-12T16:42:00Z","student":{"id":"stu-9c2e44","grade_or_year":"11","institution_id":"lincoln-high-district-42"},"assignment":{"id":"assn-2026-bio-lab-7","title":"Cell Respiration Lab Report","course_id":"course-bio-11-spring-2026","lms":"canvas","due_at":"2026-05-13T23:59:00Z"},"ai_used":true,"tools_used":[{"name":"Claude.ai","provider":"Anthropic","version":"claude-sonnet-4-6"}],"roles":["edit","cite_check"],"assistance_extent":"minor","assistance_pct":8,"prompt_evidence_mode":"hashed","prompts":[{"id":"p1","hash":"sha256:c7d1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1","at":"2026-05-12T15:55:00Z","tool_index":0},{"id":"p2","hash":"sha256:e1d2c3b4a5968778695a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e","at":"2026-05-12T16:18:00Z","tool_index":0}],"artifact_hash":"sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b","artifact_uri":"https://lincoln-high.instructure.com/files/889944/download","aup_uri":"https://lincoln-high-district-42.edu/.well-known/ai-aup.json","policy_compliant":{"declared":true,"reason":"AUP \u00a73.2 permits AI-assisted grammar review and citation verification for lab reports."},"signed_by_student":true,"student_signature_at":"2026-05-12T16:42:00Z","teacher_acknowledged":{"acknowledged":true,"by":"teacher-rivera-m","at":"2026-05-13T08:15:00Z","note":"Reviewed. Compliant with course AI policy."}}},"aup":{"label":"Classroom AI AUP","doc":{"aup_version":"0.1","policy_id":"lincoln-district-42-2026-ai-aup","policy_name":"Lincoln High District 42 \u2014 Classroom AI Acceptable Use Policy","version":"1.2.0","effective_at":"2026-01-15T00:00:00Z","scope":{"type":"district","institution_id":"lincoln-high-district-42","grade_bands":["K-5","6-8","9-12"]},"permitted_use":{"permitted_roles":["edit","cite_check","translate","tutor_dialog"],"permitted_tool_categories":["tutoring","translation"],"permitted_tools":[{"name":"Kinetic Gain K-12 Math Tutor","tutor_card_uri":"https://edu.kineticgain.com/.well-known/tutors/k12-math-tutor.json","notes":"District-approved math tutor; FERPA + COPPA attested."}],"assistance_extent_max":"minor"},"prohibited_use":{"prohibited_roles":["draft","image_generation"],"prohibited_uses":["Generating answers to assessment items (quizzes, tests, exams).","Producing first-draft prose for English Language Arts assignments.","Any use by students under 13 without recorded parent consent."]},"disclosure_requirements":{"required_when":"when_used","required_prompt_evidence_mode":"hashed","signature_required":true,"teacher_acknowledgment_required":true,"artifact_hash_required":true},"supervision":{"level":"teacher_visible","human_in_loop_categories":["mental_health_disclosure","abuse_disclosure","self_harm_disclosure"]},"vendor_requirements":{"requires_tutor_card":true,"requires_agent_card":false,"required_compliance":["ferpa","coppa"],"state_specific_laws":["NY-Ed-Law-2-D"],"required_content_filter_strength_min":"strict","requires_mandated_reporter_protocol":true,"requires_human_in_loop_for":["mental_health_disclosure","abuse_disclosure","self_harm_disclosure"],"retention_days_max":90,"prohibits_third_party_data_sharing":true,"prohibits_model_training_on_student_data":true},"parent_notification":{"notification_level":"at_enrollment","parent_consent_required":true,"consent_age_threshold":13},"enforcement":{"violation_response":["First offense: referral to academic integrity office and required AI-use briefing.","Second offense: grade reduction on affected assignment.","Third offense: referral to school disciplinary committee."],"appeals_process_uri":"https://lincoln-high-district-42.edu/students/ai-policy-appeals"},"published_by":{"name":"Lincoln High District 42 \u2014 Office of the Superintendent","role":"district","contact_uri":"mailto:ai-policy@lincoln-high-district-42.edu"},"published_at":"2026-01-08T15:30:00Z","audit_log_uri":"https://lincoln-high-district-42.edu/.well-known/ai-aup-changelog.json"}},"clinical-ai-card":{"label":"Clinical AI Card","doc":{"clinical_ai_card_version":"0.1","system":{"id":"kineticgain-molecule-design","name":"Kinetic Gain Molecule Design Assistant","version":"0.9.0-beta","provider":"Kinetic Gain Research","homepage":"https://research.kineticgain.com/molecule-design","description":"Research-use-only generative model for small-molecule scaffold ideation. Designed for academic medicinal chemistry teams and pre-IND discovery work. Does not process patient data. Not for clinical use; not a medical device."},"clinical_context":{"indication":"In silico generation and prioritization of small-molecule candidates targeting specific protein receptors. Used by computational chemists during the hit-to-lead phase of drug discovery.","care_settings":["research"],"patient_population":{"age_range_min":0,"age_range_max":130,"exclusions":["no-direct-patient-use-permitted","not-for-clinical-decision-making"]},"intended_use":"Research-use-only generative chemistry assistant. Output is a set of candidate molecular structures and prioritization scores for downstream wet-lab validation. The system is not authorized for any clinical or treatment-related use.","off_label_uses_prohibited":true},"regulatory":{"fda_status":"research_use_only","is_medical_device":false,"is_clinical_decision_support":false,"is_software_as_medical_device":false,"notes":"Research-use-only labeling enforced at deployment time; the system refuses prompts that imply patient-treatment context. IRB-equivalent review is required for any institution intending to use outputs in human-subjects research."},"clinical_role":{"decision_support_level":"informational","clinician_override_required":false,"patient_facing_only":false,"transparency_to_patient_required":false,"pre_authorization_use":false},"evidence":{"validation_studies":[{"title":"Benchmark of Kinetic Gain Molecule Design Assistant on the MOSES and GuacaMol generative-chemistry benchmarks","uri":"https://research.kineticgain.com/studies/moses-guacamol-bench-2026.pdf","population_size":100000,"primary_outcome":"Synthetic accessibility (SA score), drug-likeness (QED), novelty vs ChEMBL, diversity (internal-diversity) across 100k generated molecules","results_summary":"SA score median 3.1 (vs 3.4 for ChemFormer baseline); QED median 0.62; novelty 0.81; internal-diversity 0.72. Top-1% candidates were synthesizable in-house in 6 of 10 spot-checks.","peer_reviewed":false,"published_at":"2026-01-22T00:00:00Z"}],"training_data_sources":["ChEMBL release 33 (public)","ZINC20 lead-like subset (public)","Internal medicinal-chemistry literature corpus (licensed)"],"performance_metrics":{"measurement_population":"Generated molecule pool across 100k samples on three target proteins (EGFR, BRAF, COX-2)","accuracy":0.62,"precision":0.58,"recall":0.41}},"patient_data":{"phi_processed":false,"retention_days":0,"patient_consent_required":false,"third_party_data_sharing":false},"safety":{"human_in_loop_required_for":["queries-implying-clinical-use","queries-targeting-controlled-substances"],"mandatory_reporting_categories":[],"blocks_diagnostic_claims":true,"treatment_recommendation_disclaimer_required":true},"agent_card_uri":"https://research.kineticgain.com/.well-known/agents/molecule-design.json","audit":{"audit_log_uri":"https://research.kineticgain.com/audit/molecule-design","disclosure_uri":"https://research.kineticgain.com/molecule-design/changelog"}}},"incident-card":{"label":"AI Incident Card","doc":{"incident_card_version":"0.1","incident":{"id":"INC-2026-05-09-kineticgain-003","title":"Cite-check tool surfaced PII from cached training-data snippets","severity":"high","categories":["pii_leak"],"discovered_at":"2026-05-09T08:15:00Z","occurred_at":"2026-05-08T20:00:00Z","disclosed_at":"2026-05-10T12:00:00Z","resolved_at":"2026-05-11T09:30:00Z","status":"resolved"},"affected":{"vendor":"Kinetic Gain","products":["RAG Sentinel cite-check pipeline"],"versions":["1.2.3"],"tool_card_uris":["https://rag.kineticgain.com/.well-known/mcp-tools/cite-check.json"],"affected_user_count":{"kind":"exact","count":7},"affected_populations":["enterprise-tenants-eu"]},"summary":"Seven enterprise tenants invoking the cite-check tool received cached citation snippets that contained third-party PII (names, email addresses, and one street address) from an indexed Common Crawl dataset. The PII was present in source pages with robots.txt directives that should have excluded them from the cache; a regex normalization step had unintentionally removed those directives during ingestion. The leak was caught by a routine PII scan over the cache, not by a tenant report.","root_cause":{"category":"training_data","description":"An over-permissive regex in the cache-ingestion pipeline normalized 'Disallow: /' to '' when adjacent to whitespace anomalies, effectively allowing pages tagged for exclusion into the citation cache. 1.4% of cached snippets contained excluded-page content; of those, 0.02% contained PII."},"harm":{"severity_justification":"PII leak under GDPR-protected jurisdiction. High rather than critical because exposure was time-bounded (the affected cache shard lived for 13 hours), no special-category data (health, biometric, etc.) was disclosed, and downstream surfaces of the seven tenants did not propagate the leaked content to end-users.","manifested":true,"narrative":"Seven tenant accounts received tool responses containing 23 unique PII fragments across 11 citation snippets. All seven tenants have been notified directly; cache was purged within 4 hours of discovery; full re-ingestion with corrected pipeline completed 17 hours later."},"mitigation":{"actions_taken":["Patched the cache-ingestion regex; added 84 test cases covering edge-case whitespace patterns in robots.txt parsing.","Purged the affected cache shard within 4 hours of discovery.","Re-ingested all sources with the corrected pipeline (17h total).","Notified the 7 affected tenants via account-channel and offered SOC-2-grade incident packet under NDA.","Submitted Article 33 breach notification to the lead supervisory authority (Irish DPC) within the 72-hour GDPR window."],"permanent_fix":true,"rollout_status":"deployed","workaround_for_users":"No tenant action required. Affected cache is purged; cite-check tool is operating normally."},"evidence":{"evidence_uris":["https://rag.kineticgain.com/.well-known/evidence/INC-2026-05-09-kineticgain-003-ev1.json","https://rag.kineticgain.com/.well-known/evidence/INC-2026-05-09-kineticgain-003-ev2.json"],"internal_postmortem_uri":"https://rag.kineticgain.com/security/postmortems/INC-2026-05-09-kineticgain-003.md"},"references":[{"type":"regulatory_filing","title":"Article 33 breach notification \u2014 Irish Data Protection Commission","uri":"https://rag.kineticgain.com/regulatory/2026-05-10-art33-dpc-ireland.pdf","published_at":"2026-05-10T11:45:00Z"},{"type":"blog_post","title":"Postmortem: A whitespace bug in robots.txt parsing surfaced PII through our cite-check cache","uri":"https://rag.kineticgain.com/blog/postmortem-pii-cache-leak","published_at":"2026-05-12T15:00:00Z"}],"regulatory":{"reported_to":["gdpr"],"reporting_deadline_met":true,"regulatory_filing_uris":["https://rag.kineticgain.com/regulatory/2026-05-10-art33-dpc-ireland.pdf"]},"published_by":{"name":"Kinetic Gain \u2014 Trust & Safety","role":"vendor","contact_uri":"mailto:trust-safety@kineticgain.com"},"published_at":"2026-05-10T12:00:00Z","last_updated_at":"2026-05-12T15:30:00Z","revision":{"number":2,"change_summary":"Status changed to resolved; appended postmortem blog reference."}}}}</script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "ajv": "https://esm.sh/ajv@8/dist/2020",
+      "ajv-formats": "https://esm.sh/ajv-formats@3"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import Ajv2020 from "ajv";
+    import addFormats from "ajv-formats";
+
+    // Discriminator: version-field name -> bundled schema key + display name.
+    const SPECS = [
+      { versionField: "aeo_version",              schemaKey: "aeo",                   displayName: "AEO Protocol" },
+      { versionField: "provenance_version",       schemaKey: "provenance",            displayName: "Prompt Provenance" },
+      { versionField: "agent_card_version",       schemaKey: "agent-card",            displayName: "Agent Card" },
+      { versionField: "evidence_version",         schemaKey: "evidence",              displayName: "AI Evidence Format" },
+      { versionField: "tool_card_version",        schemaKey: "tool-card",             displayName: "MCP Tool Card" },
+      { versionField: "tutor_card_version",       schemaKey: "tutor-card",            displayName: "AI Tutor Card" },
+      { versionField: "disclosure_version",       schemaKey: "student-ai-disclosure", displayName: "Student AI Disclosure" },
+      { versionField: "aup_version",              schemaKey: "aup",                   displayName: "Classroom AI AUP" },
+      { versionField: "clinical_ai_card_version", schemaKey: "clinical-ai-card",      displayName: "Clinical AI Card" },
+      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" },
+    ];
+
+    const schemas  = JSON.parse(document.getElementById("schemas-blob").textContent);
+    const examples = JSON.parse(document.getElementById("examples-blob").textContent);
+
+    const ajv = new Ajv2020({ strict: false, allErrors: true, allowUnionTypes: true });
+    addFormats(ajv);
+    // Pre-compile every schema once; we'll look up by spec key.
+    const validators = Object.fromEntries(
+      Object.entries(schemas).map(([key, schema]) => [key, ajv.compile(schema)]),
+    );
+
+    function detectSpec(doc) {
+      if (doc === null || typeof doc !== "object" || Array.isArray(doc)) return null;
+      for (const spec of SPECS) {
+        if (Object.prototype.hasOwnProperty.call(doc, spec.versionField)) return spec;
+      }
+      return null;
+    }
+
+    const $input        = document.getElementById("input");
+    const $validateBtn  = document.getElementById("validateBtn");
+    const $clearBtn     = document.getElementById("clearBtn");
+    const $copyBtn      = document.getElementById("copyResultBtn");
+    const $result       = document.getElementById("result");
+    const $examples     = document.querySelector(".examples");
+    let lastResultJson  = null;
+
+    // Inject example buttons. One per spec, ordered by SPECS array for narrative
+    // (core specs first, vertical extensions next, cross-cutting last).
+    for (const spec of SPECS) {
+      const ex = examples[spec.schemaKey];
+      if (!ex) continue;
+      const btn = document.createElement("button");
+      btn.className = "ex-pill";
+      btn.type = "button";
+      btn.textContent = spec.displayName;
+      btn.addEventListener("click", () => {
+        $input.value = JSON.stringify(ex.doc, null, 2);
+        $input.focus();
+        // Auto-validate so the user immediately sees a pass result.
+        runValidate();
+      });
+      $examples.appendChild(btn);
+    }
+
+    function renderBanner(kind, label, detail) {
+      const icon = kind === "pass" ? "✓" : kind === "fail" ? "✕" : kind === "warn" ? "!" : "○";
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      return `
+        <div class="status-banner ${kind}">
+          <span class="icon">${icon}</span>
+          <div>
+            <div class="label">${escape(label)}</div>
+            <div class="detail">${escape(detail)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderMeta(spec, versionValue, errorCount) {
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      return `
+        <dl class="meta-row">
+          <dt>Spec</dt>            <dd>${escape(spec.displayName)}</dd>
+          <dt>Version field</dt>   <dd><code>${escape(spec.versionField)}</code> = "${escape(versionValue)}"</dd>
+          <dt>Schema key</dt>      <dd><code>${escape(spec.schemaKey)}.schema.json</code></dd>
+          <dt>Schema errors</dt>   <dd>${errorCount}</dd>
+        </dl>`;
+    }
+
+    function renderErrors(errors) {
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      const items = errors.map((e) => {
+        const path = e.instancePath && e.instancePath.length ? e.instancePath : "(root)";
+        const params = e.params && Object.keys(e.params).length ? ` <span class="err-msg">[${escape(JSON.stringify(e.params))}]</span>` : "";
+        return `<li><span class="err-path">${escape(path)}</span> <span class="err-msg">${escape(e.message || e.keyword)}</span>${params}</li>`;
+      }).join("");
+      return `<ul class="err-list">${items}</ul>`;
+    }
+
+    function setResult(html, copyableJson) {
+      $result.innerHTML = html;
+      lastResultJson = copyableJson;
+      $copyBtn.disabled = copyableJson === null;
+    }
+
+    function runValidate() {
+      const text = $input.value.trim();
+      if (!text) {
+        setResult(
+          renderBanner("idle", "Empty input", "Paste a Suite JSON document or click an example pill below.")
+          + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
+          null,
+        );
+        return;
+      }
+      let doc;
+      try {
+        doc = JSON.parse(text);
+      } catch (err) {
+        setResult(
+          renderBanner("fail", "Parse error", "The input is not valid JSON.")
+          + `<dl class="meta-row"><dt>Parser said</dt><dd>${String(err.message).replace(/</g, "&lt;")}</dd></dl>`,
+          { ok: false, parseError: String(err.message) },
+        );
+        return;
+      }
+      const spec = detectSpec(doc);
+      if (!spec) {
+        setResult(
+          renderBanner("warn", "No recognized Suite version field", "Add one of the ten Suite version fields at the top level to validate.")
+          + `<dl class="meta-row"><dt>Expected one of</dt><dd>${SPECS.map(s => `<code>${s.versionField}</code>`).join(", ")}</dd></dl>`,
+          { ok: false, unrecognized: true },
+        );
+        return;
+      }
+      const validate = validators[spec.schemaKey];
+      const ok = validate(doc);
+      const versionValue = doc[spec.versionField];
+      if (ok) {
+        setResult(
+          renderBanner("pass", "Valid", `${spec.displayName} document conforms to its JSON Schema.`)
+          + renderMeta(spec, versionValue, 0),
+          { ok: true, spec: spec.schemaKey, version: versionValue },
+        );
+      } else {
+        const errors = validate.errors || [];
+        setResult(
+          renderBanner("fail", "Schema violations", `${errors.length} error${errors.length === 1 ? "" : "s"} found against the ${spec.displayName} schema.`)
+          + renderMeta(spec, versionValue, errors.length)
+          + renderErrors(errors),
+          {
+            ok: false,
+            spec: spec.schemaKey,
+            version: versionValue,
+            errors: errors.map(e => ({ path: e.instancePath || "(root)", keyword: e.keyword, message: e.message, params: e.params })),
+          },
+        );
+      }
+    }
+
+    $validateBtn.addEventListener("click", runValidate);
+    $clearBtn.addEventListener("click", () => {
+      $input.value = "";
+      setResult(
+        renderBanner("idle", "Ready", "Paste a Suite document on the left, then click Validate.")
+        + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
+        null,
+      );
+      $input.focus();
+    });
+    $input.addEventListener("keydown", (e) => {
+      // Cmd/Ctrl + Enter triggers validate.
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        runValidate();
+      }
+    });
+    $copyBtn.addEventListener("click", async () => {
+      if (lastResultJson === null) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(lastResultJson, null, 2));
+        const original = $copyBtn.textContent;
+        $copyBtn.textContent = "Copied";
+        setTimeout(() => { $copyBtn.textContent = original; }, 1200);
+      } catch {
+        // Clipboard API unavailable — ignore.
+      }
+    });
+  </script>
+</body>
+</html>

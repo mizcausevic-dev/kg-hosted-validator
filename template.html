@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kinetic Gain Suite Validator — verify any vendor's AI governance JSON</title>
+  <meta name="description" content="Paste any Kinetic Gain Protocol Suite JSON document. Get a procurement-grade validation report. Free, zero-install, in-browser." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://validator.kineticgain.com/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://validator.kineticgain.com/" />
+  <meta property="og:title" content="Kinetic Gain Suite Validator" />
+  <meta property="og:description" content="Paste any AI governance JSON — AI Entity Card, Clinical AI Card, AI Incident Card, Classroom AUP, Student Disclosure, and seven other Kinetic Gain Protocol Suite specs. Get a validation report against the canonical JSON Schema." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink:        #2a2418;
+      --ink-soft:   #5a513f;
+      --muted:      #8a7e63;
+      --cream:      #f6efe1;
+      --paper:      #fbf6ea;
+      --line:       rgba(125, 100, 60, .18);
+      --gold:       #c58b4b;
+      --copper:     #b8653c;
+      --sage:       #6f7a52;
+      --emerald:    #4f6b48;
+      --rose:       #b94f4f;
+      --amber:      #c79a3a;
+      --surface:    rgba(255, 248, 237, .55);
+      --surface-strong: rgba(255, 248, 237, .80);
+      --shadow:     0 18px 38px rgba(60, 40, 20, .08);
+      --radius:     14px;
+      --radius-lg:  22px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:      #f5ecd6;
+        --ink-soft: #d1c4a0;
+        --muted:    #a4977b;
+        --cream:    #1a1812;
+        --paper:    #14120c;
+        --line:     rgba(245, 220, 170, .12);
+        --surface:  rgba(255, 248, 237, .04);
+        --surface-strong: rgba(255, 248, 237, .07);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.55;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--copper); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--gold); }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.92em; }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px; }
+
+    header.top { margin-bottom: 28px; }
+    .kicker {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--copper);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.1;
+      margin: 0 0 12px;
+      letter-spacing: -.02em;
+    }
+    h1 .serif { font-family: 'Instrument Serif', serif; font-weight: 400; }
+    .lede { color: var(--ink-soft); font-size: 17px; max-width: 720px; margin: 0; }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 28px;
+    }
+    @media (max-width: 880px) { .pair { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .panel-title {
+      font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--sage);
+    }
+
+    textarea#input {
+      width: 100%;
+      min-height: 360px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      background: var(--paper);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .15s ease;
+    }
+    textarea#input:focus { border-color: var(--copper); }
+
+    .controls {
+      display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 16px; border-radius: 999px;
+      border: 1px solid var(--line);
+      font: inherit; font-weight: 700; font-size: 14px;
+      cursor: pointer; transition: .15s ease;
+      background: var(--surface-strong);
+      color: var(--ink);
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--gold), var(--copper));
+      color: #fff8ed;
+      border-color: rgba(255,255,255,.26);
+      box-shadow: 0 12px 28px rgba(184,101,60,.22);
+    }
+    .btn.primary:hover { box-shadow: 0 16px 36px rgba(184,101,60,.30); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .examples {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px;
+    }
+    .examples small {
+      width: 100%; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; margin-bottom: 4px;
+    }
+    .ex-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 5px 10px; border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: .15s ease;
+    }
+    .ex-pill:hover { border-color: var(--copper); color: var(--copper); }
+
+    /* Result panel */
+    #result { min-height: 360px; display: flex; flex-direction: column; gap: 14px; }
+    .status-banner {
+      padding: 16px 18px; border-radius: var(--radius);
+      display: flex; align-items: center; gap: 12px;
+      border: 1px solid;
+    }
+    .status-banner .icon { font-size: 22px; line-height: 1; }
+    .status-banner .label { font-weight: 800; font-size: 14px; letter-spacing: .04em; }
+    .status-banner .detail { color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+    .status-banner.pass { background: rgba(79, 107, 72, .10); border-color: rgba(79, 107, 72, .35); }
+    .status-banner.pass .label { color: var(--emerald); }
+    .status-banner.fail { background: rgba(185, 79, 79, .10); border-color: rgba(185, 79, 79, .35); }
+    .status-banner.fail .label { color: var(--rose); }
+    .status-banner.warn { background: rgba(199, 154, 58, .10); border-color: rgba(199, 154, 58, .40); }
+    .status-banner.warn .label { color: var(--amber); }
+    .status-banner.idle { background: var(--surface); border-color: var(--line); }
+    .status-banner.idle .label { color: var(--muted); }
+
+    .meta-row {
+      display: grid; grid-template-columns: auto 1fr; gap: 8px 16px;
+      font-size: 13px;
+      padding: 14px 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .meta-row dt { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; align-self: center; }
+    .meta-row dd { margin: 0; color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+    .err-list {
+      list-style: none;
+      margin: 0; padding: 0;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .err-list li {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .err-list li:last-child { border-bottom: none; }
+    .err-list .err-path { font-family: 'JetBrains Mono', monospace; color: var(--copper); font-weight: 700; }
+    .err-list .err-msg { color: var(--ink-soft); }
+
+    .hint { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+    footer {
+      margin-top: 56px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    footer .links { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 10px; }
+    footer .links a { color: var(--ink-soft); }
+    footer small { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="kicker">Kinetic Gain Protocol Suite</div>
+      <h1>Validate any AI governance JSON, <span class="serif">in your browser.</span></h1>
+      <p class="lede">Paste a vendor's AI Entity Card, Clinical AI Card, Classroom AUP, Student Disclosure, Tool Disclosure, or any of the ten Kinetic Gain Suite documents. The validator detects which spec it belongs to via its version field, then checks it against the canonical JSON Schema. No upload, no server, no signup — everything runs locally.</p>
+    </header>
+
+    <div class="pair">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input · paste Suite JSON</span>
+          <button id="clearBtn" class="btn" type="button">Clear</button>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder='Paste a JSON document with a Suite version field, e.g.:
+
+{
+  "aeo_version": "0.1",
+  "entity": { ... },
+  "authority": { ... },
+  "claims": [ ... ]
+}
+
+Or pick an example below.'></textarea>
+        <div class="controls">
+          <button id="validateBtn" class="btn primary" type="button">Validate</button>
+          <button id="copyResultBtn" class="btn" type="button" disabled>Copy result as JSON</button>
+        </div>
+        <div class="examples">
+          <small>Try an example</small>
+          <!-- example buttons injected by the script -->
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Validation report</span>
+        </div>
+        <div id="result">
+          <div class="status-banner idle">
+            <span class="icon">○</span>
+            <div>
+              <div class="label">Ready</div>
+              <div class="detail">Paste a Suite document on the left, then click Validate.</div>
+            </div>
+          </div>
+          <p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser via the same JSON Schema 2020-12 documents shipped in the spec repos on GitHub. Nothing is uploaded or logged.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="links">
+        <a href="https://suite.kineticgain.com/">Suite hub</a>
+        <a href="https://github.com/mizcausevic-dev/mcp-kinetic-gain">MCP server</a>
+        <a href="https://github.com/mizcausevic-dev/kg-validate-action">GitHub Action</a>
+        <a href="https://www.npmjs.com/package/mcp-kinetic-gain">npm: mcp-kinetic-gain</a>
+        <a href="https://kineticgain.com/">Kinetic Gain LLC</a>
+      </div>
+      <small>The Kinetic Gain Protocol Suite. Ten open JSON specifications for trustworthy AI in regulated verticals (EdTech, HealthTech, cross-cutting incidents). Specs and SDKs are MIT-licensed; reference implementations like mcp-kinetic-gain are AGPL-3.0. © 2026 Miz Causevic / Kinetic Gain LLC.</small>
+    </footer>
+  </div>
+
+  <script type="application/json" id="schemas-blob">__SCHEMAS_PLACEHOLDER__</script>
+  <script type="application/json" id="examples-blob">__EXAMPLES_PLACEHOLDER__</script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "ajv": "https://esm.sh/ajv@8/dist/2020",
+      "ajv-formats": "https://esm.sh/ajv-formats@3"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import Ajv2020 from "ajv";
+    import addFormats from "ajv-formats";
+
+    // Discriminator: version-field name -> bundled schema key + display name.
+    const SPECS = [
+      { versionField: "aeo_version",              schemaKey: "aeo",                   displayName: "AEO Protocol" },
+      { versionField: "provenance_version",       schemaKey: "provenance",            displayName: "Prompt Provenance" },
+      { versionField: "agent_card_version",       schemaKey: "agent-card",            displayName: "Agent Card" },
+      { versionField: "evidence_version",         schemaKey: "evidence",              displayName: "AI Evidence Format" },
+      { versionField: "tool_card_version",        schemaKey: "tool-card",             displayName: "MCP Tool Card" },
+      { versionField: "tutor_card_version",       schemaKey: "tutor-card",            displayName: "AI Tutor Card" },
+      { versionField: "disclosure_version",       schemaKey: "student-ai-disclosure", displayName: "Student AI Disclosure" },
+      { versionField: "aup_version",              schemaKey: "aup",                   displayName: "Classroom AI AUP" },
+      { versionField: "clinical_ai_card_version", schemaKey: "clinical-ai-card",      displayName: "Clinical AI Card" },
+      { versionField: "incident_card_version",    schemaKey: "incident-card",         displayName: "AI Incident Card" },
+    ];
+
+    const schemas  = JSON.parse(document.getElementById("schemas-blob").textContent);
+    const examples = JSON.parse(document.getElementById("examples-blob").textContent);
+
+    const ajv = new Ajv2020({ strict: false, allErrors: true, allowUnionTypes: true });
+    addFormats(ajv);
+    // Pre-compile every schema once; we'll look up by spec key.
+    const validators = Object.fromEntries(
+      Object.entries(schemas).map(([key, schema]) => [key, ajv.compile(schema)]),
+    );
+
+    function detectSpec(doc) {
+      if (doc === null || typeof doc !== "object" || Array.isArray(doc)) return null;
+      for (const spec of SPECS) {
+        if (Object.prototype.hasOwnProperty.call(doc, spec.versionField)) return spec;
+      }
+      return null;
+    }
+
+    const $input        = document.getElementById("input");
+    const $validateBtn  = document.getElementById("validateBtn");
+    const $clearBtn     = document.getElementById("clearBtn");
+    const $copyBtn      = document.getElementById("copyResultBtn");
+    const $result       = document.getElementById("result");
+    const $examples     = document.querySelector(".examples");
+    let lastResultJson  = null;
+
+    // Inject example buttons. One per spec, ordered by SPECS array for narrative
+    // (core specs first, vertical extensions next, cross-cutting last).
+    for (const spec of SPECS) {
+      const ex = examples[spec.schemaKey];
+      if (!ex) continue;
+      const btn = document.createElement("button");
+      btn.className = "ex-pill";
+      btn.type = "button";
+      btn.textContent = spec.displayName;
+      btn.addEventListener("click", () => {
+        $input.value = JSON.stringify(ex.doc, null, 2);
+        $input.focus();
+        // Auto-validate so the user immediately sees a pass result.
+        runValidate();
+      });
+      $examples.appendChild(btn);
+    }
+
+    function renderBanner(kind, label, detail) {
+      const icon = kind === "pass" ? "✓" : kind === "fail" ? "✕" : kind === "warn" ? "!" : "○";
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      return `
+        <div class="status-banner ${kind}">
+          <span class="icon">${icon}</span>
+          <div>
+            <div class="label">${escape(label)}</div>
+            <div class="detail">${escape(detail)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderMeta(spec, versionValue, errorCount) {
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      return `
+        <dl class="meta-row">
+          <dt>Spec</dt>            <dd>${escape(spec.displayName)}</dd>
+          <dt>Version field</dt>   <dd><code>${escape(spec.versionField)}</code> = "${escape(versionValue)}"</dd>
+          <dt>Schema key</dt>      <dd><code>${escape(spec.schemaKey)}.schema.json</code></dd>
+          <dt>Schema errors</dt>   <dd>${errorCount}</dd>
+        </dl>`;
+    }
+
+    function renderErrors(errors) {
+      const escape = (s) => String(s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+      const items = errors.map((e) => {
+        const path = e.instancePath && e.instancePath.length ? e.instancePath : "(root)";
+        const params = e.params && Object.keys(e.params).length ? ` <span class="err-msg">[${escape(JSON.stringify(e.params))}]</span>` : "";
+        return `<li><span class="err-path">${escape(path)}</span> <span class="err-msg">${escape(e.message || e.keyword)}</span>${params}</li>`;
+      }).join("");
+      return `<ul class="err-list">${items}</ul>`;
+    }
+
+    function setResult(html, copyableJson) {
+      $result.innerHTML = html;
+      lastResultJson = copyableJson;
+      $copyBtn.disabled = copyableJson === null;
+    }
+
+    function runValidate() {
+      const text = $input.value.trim();
+      if (!text) {
+        setResult(
+          renderBanner("idle", "Empty input", "Paste a Suite JSON document or click an example pill below.")
+          + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
+          null,
+        );
+        return;
+      }
+      let doc;
+      try {
+        doc = JSON.parse(text);
+      } catch (err) {
+        setResult(
+          renderBanner("fail", "Parse error", "The input is not valid JSON.")
+          + `<dl class="meta-row"><dt>Parser said</dt><dd>${String(err.message).replace(/</g, "&lt;")}</dd></dl>`,
+          { ok: false, parseError: String(err.message) },
+        );
+        return;
+      }
+      const spec = detectSpec(doc);
+      if (!spec) {
+        setResult(
+          renderBanner("warn", "No recognized Suite version field", "Add one of the ten Suite version fields at the top level to validate.")
+          + `<dl class="meta-row"><dt>Expected one of</dt><dd>${SPECS.map(s => `<code>${s.versionField}</code>`).join(", ")}</dd></dl>`,
+          { ok: false, unrecognized: true },
+        );
+        return;
+      }
+      const validate = validators[spec.schemaKey];
+      const ok = validate(doc);
+      const versionValue = doc[spec.versionField];
+      if (ok) {
+        setResult(
+          renderBanner("pass", "Valid", `${spec.displayName} document conforms to its JSON Schema.`)
+          + renderMeta(spec, versionValue, 0),
+          { ok: true, spec: spec.schemaKey, version: versionValue },
+        );
+      } else {
+        const errors = validate.errors || [];
+        setResult(
+          renderBanner("fail", "Schema violations", `${errors.length} error${errors.length === 1 ? "" : "s"} found against the ${spec.displayName} schema.`)
+          + renderMeta(spec, versionValue, errors.length)
+          + renderErrors(errors),
+          {
+            ok: false,
+            spec: spec.schemaKey,
+            version: versionValue,
+            errors: errors.map(e => ({ path: e.instancePath || "(root)", keyword: e.keyword, message: e.message, params: e.params })),
+          },
+        );
+      }
+    }
+
+    $validateBtn.addEventListener("click", runValidate);
+    $clearBtn.addEventListener("click", () => {
+      $input.value = "";
+      setResult(
+        renderBanner("idle", "Ready", "Paste a Suite document on the left, then click Validate.")
+        + `<p class="hint">All ten spec schemas are bundled with this page. Validation happens entirely in your browser.</p>`,
+        null,
+      );
+      $input.focus();
+    });
+    $input.addEventListener("keydown", (e) => {
+      // Cmd/Ctrl + Enter triggers validate.
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        runValidate();
+      }
+    });
+    $copyBtn.addEventListener("click", async () => {
+      if (lastResultJson === null) return;
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(lastResultJson, null, 2));
+        const original = $copyBtn.textContent;
+        $copyBtn.textContent = "Copied";
+        setTimeout(() => { $copyBtn.textContent = original; }, 1200);
+      } catch {
+        // Clipboard API unavailable — ignore.
+      }
+    });
+  </script>
+</body>
+</html>
