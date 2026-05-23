@@ -57,7 +57,7 @@ A family of **10 open JSON specifications** for the answer-engine and agent era 
 
 ## Author
 
-**Miz Causevic** — Director / Principal Platform Engineering, Boston, MA. Two decades across IBM, CyberArk, Alteryx. Author of the Kinetic Gain Protocol Suite. The entire suite is authored under [github.com/mizcausevic-dev](https://github.com/mizcausevic-dev) in the open.
+**Miz Causevic** — Boston Enterprise Technologist, Boston, MA. Two decades across IBM, CyberArk, Alteryx. Author of the Kinetic Gain Protocol Suite. The entire suite is authored under [github.com/mizcausevic-dev](https://github.com/mizcausevic-dev) in the open.
 
 - Apex: [kineticgain.com](https://kineticgain.com/)
 - LinkedIn: [linkedin.com/in/mirzacausevic](https://www.linkedin.com/in/mirzacausevic/)
