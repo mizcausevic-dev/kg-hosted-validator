@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#070b16" />
   <title>Kinetic Gain Suite Validator — verify any vendor's AI governance JSON</title>
   <meta name="description" content="Paste any Kinetic Gain Protocol Suite JSON document. Get a procurement-grade validation report with inline error markers. Free, zero-install, in-browser." />
   <meta name="robots" content="index, follow" />
@@ -19,38 +21,38 @@
 
   <style>
     :root {
-      --ink:        #2a2418;
-      --ink-soft:   #5a513f;
-      --muted:      #8a7e63;
-      --cream:      #f6efe1;
-      --paper:      #fbf6ea;
-      --line:       rgba(125, 100, 60, .18);
-      --line-strong:rgba(125, 100, 60, .32);
-      --gold:       #c58b4b;
-      --copper:     #b8653c;
-      --sage:       #6f7a52;
-      --emerald:    #4f6b48;
-      --rose:       #b94f4f;
-      --amber:      #c79a3a;
-      --surface:    rgba(255, 248, 237, .55);
-      --surface-strong: rgba(255, 248, 237, .80);
-      --shadow:     0 18px 38px rgba(60, 40, 20, .08);
-      --shadow-lg:  0 28px 56px rgba(60, 40, 20, .14);
+      --ink:        #e2e8f0;
+      --ink-soft:   #94a3b8;
+      --muted:      #64748b;
+      --cream:      #070b16;
+      --paper:      #0f172a;
+      --line:       rgba(148, 163, 184, .18);
+      --line-strong:rgba(148, 163, 184, .32);
+      --gold:       #93c5fd;
+      --copper:     #60a5fa;
+      --sage:       #34d399;
+      --emerald:    #34d399;
+      --rose:       #fb7185;
+      --amber:      #fbbf24;
+      --surface:    rgba(148, 163, 184, .55);
+      --surface-strong: rgba(148, 163, 184, .80);
+      --shadow:     0 18px 38px rgba(0, 0, 0, .08);
+      --shadow-lg:  0 28px 56px rgba(0, 0, 0, .14);
       --radius:     14px;
       --radius-lg:  22px;
       --radius-xl:  32px;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --ink:        #f5ecd6;
-        --ink-soft:   #d1c4a0;
-        --muted:      #a4977b;
-        --cream:      #14120c;
-        --paper:      #1a1812;
-        --line:       rgba(245, 220, 170, .12);
-        --line-strong:rgba(245, 220, 170, .22);
-        --surface:    rgba(255, 248, 237, .04);
-        --surface-strong: rgba(255, 248, 237, .07);
+        --ink:        #e2e8f0;
+        --ink-soft:   #94a3b8;
+        --muted:      #64748b;
+        --cream:      #070b16;
+        --paper:      #0f172a;
+        --line:       rgba(148, 163, 184, .12);
+        --line-strong:rgba(148, 163, 184, .22);
+        --surface:    rgba(148, 163, 184, .04);
+        --surface-strong: rgba(148, 163, 184, .07);
       }
     }
     * { box-sizing: border-box; }
@@ -180,7 +182,7 @@
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
     }
-    .auto-indicator .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 3px rgba(111, 122, 82, .15); }
+    .auto-indicator .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 3px rgba(52, 211, 153, .15); }
     .auto-indicator.busy .dot { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
     @keyframes pulse { 50% { opacity: .4; } }
 
@@ -213,9 +215,9 @@
       background: var(--surface-strong);
       overflow: hidden;
     }
-    .hero.pass { background: linear-gradient(135deg, rgba(79, 107, 72, .15), rgba(111, 122, 82, .06)); border-color: rgba(79, 107, 72, .35); }
-    .hero.fail { background: linear-gradient(135deg, rgba(185, 79, 79, .14), rgba(199, 154, 58, .04)); border-color: rgba(185, 79, 79, .35); }
-    .hero.warn { background: linear-gradient(135deg, rgba(199, 154, 58, .15), rgba(255, 248, 237, .04)); border-color: rgba(199, 154, 58, .40); }
+    .hero.pass { background: linear-gradient(135deg, rgba(16, 185, 129, .15), rgba(52, 211, 153, .06)); border-color: rgba(16, 185, 129, .35); }
+    .hero.fail { background: linear-gradient(135deg, rgba(251, 113, 133, .14), rgba(251, 191, 36, .04)); border-color: rgba(251, 113, 133, .35); }
+    .hero.warn { background: linear-gradient(135deg, rgba(251, 191, 36, .15), rgba(148, 163, 184, .04)); border-color: rgba(251, 191, 36, .40); }
     .hero.idle { background: var(--surface); border-color: var(--line); }
 
     .hero-label {
@@ -397,47 +399,47 @@
             base: 'vs',
             inherit: true,
             rules: [
-              { token: '',                  foreground: '2a2418' },
-              { token: 'string.key.json',   foreground: '6f7a52', fontStyle: 'bold' },
-              { token: 'string.value.json', foreground: 'b8653c' },
-              { token: 'number',            foreground: '4f6b48' },
-              { token: 'keyword.json',      foreground: 'c58b4b', fontStyle: 'bold' },
-              { token: 'delimiter',         foreground: '8a7e63' }
+              { token: '',                  foreground: 'e2e8f0' },
+              { token: 'string.key.json',   foreground: '34d399', fontStyle: 'bold' },
+              { token: 'string.value.json', foreground: '60a5fa' },
+              { token: 'number',            foreground: '34d399' },
+              { token: 'keyword.json',      foreground: '93c5fd', fontStyle: 'bold' },
+              { token: 'delimiter',         foreground: '64748b' }
             ],
             colors: {
-              'editor.background':                  '#fbf6ea',
-              'editor.foreground':                  '#2a2418',
-              'editorLineNumber.foreground':        '#bbac8a',
-              'editorLineNumber.activeForeground':  '#8a7e63',
-              'editor.lineHighlightBackground':     '#f1e8d0',
-              'editor.selectionBackground':         '#e6d8b3',
-              'editor.inactiveSelectionBackground': '#efe4c4',
-              'editorIndentGuide.background':       '#e8dcbc',
-              'editorIndentGuide.activeBackground': '#c58b4b',
-              'editorCursor.foreground':            '#b8653c',
-              'editorError.foreground':             '#b94f4f',
-              'editorWarning.foreground':           '#c79a3a',
-              'editorGutter.background':            '#f6efe1'
+              'editor.background':                  '#0f172a',
+              'editor.foreground':                  '#e2e8f0',
+              'editorLineNumber.foreground':        '#475569',
+              'editorLineNumber.activeForeground':  '#64748b',
+              'editor.lineHighlightBackground':     '#0f1d33',
+              'editor.selectionBackground':         '#1e3a5f',
+              'editor.inactiveSelectionBackground': '#16263f',
+              'editorIndentGuide.background':       '#1e293b',
+              'editorIndentGuide.activeBackground': '#93c5fd',
+              'editorCursor.foreground':            '#60a5fa',
+              'editorError.foreground':             '#fb7185',
+              'editorWarning.foreground':           '#fbbf24',
+              'editorGutter.background':            '#070b16'
             }
           });
           monaco.editor.defineTheme('kg-warm-dark', {
             base: 'vs-dark',
             inherit: true,
             rules: [
-              { token: '',                  foreground: 'f5ecd6' },
-              { token: 'string.key.json',   foreground: 'a4b385', fontStyle: 'bold' },
-              { token: 'string.value.json', foreground: 'd9885f' },
-              { token: 'number',            foreground: '85a07c' },
-              { token: 'keyword.json',      foreground: 'd9a86e', fontStyle: 'bold' },
-              { token: 'delimiter',         foreground: 'a4977b' }
+              { token: '',                  foreground: 'e2e8f0' },
+              { token: 'string.key.json',   foreground: '34d399', fontStyle: 'bold' },
+              { token: 'string.value.json', foreground: '60a5fa' },
+              { token: 'number',            foreground: '34d399' },
+              { token: 'keyword.json',      foreground: '93c5fd', fontStyle: 'bold' },
+              { token: 'delimiter',         foreground: '64748b' }
             ],
             colors: {
-              'editor.background':              '#1a1812',
-              'editor.foreground':              '#f5ecd6',
-              'editorLineNumber.foreground':    '#6f6342',
-              'editor.lineHighlightBackground': '#221f17',
-              'editor.selectionBackground':     '#3a2f1e',
-              'editorGutter.background':        '#14120c'
+              'editor.background':              '#0f172a',
+              'editor.foreground':              '#e2e8f0',
+              'editorLineNumber.foreground':    '#475569',
+              'editor.lineHighlightBackground': '#0f1d33',
+              'editor.selectionBackground':     '#1e3a5f',
+              'editorGutter.background':        '#070b16'
             }
           });
           // We use AJV for validation, so disable Monaco's built-in JSON validator.
@@ -451,7 +453,7 @@
           var editor = monaco.editor.create(document.getElementById('editor-host'), {
             value: '',
             language: 'json',
-            theme: prefersDark ? 'kg-warm-dark' : 'kg-warm-light',
+            theme: 'kg-warm-dark',
             fontFamily: 'JetBrains Mono, ui-monospace, monospace',
             fontSize: 13,
             lineNumbers: 'on',
@@ -466,7 +468,7 @@
           });
           if (window.matchMedia) {
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
-              monaco.editor.setTheme(e.matches ? 'kg-warm-dark' : 'kg-warm-light');
+              monaco.editor.setTheme('kg-warm-dark');
             });
           }
           var loadingEl = document.getElementById('editorLoading');
